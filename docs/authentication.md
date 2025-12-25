@@ -111,3 +111,88 @@ Retrieve the currently authenticated user's details.
 
 - **Success Response (200 OK)**:
   Returns the user object.
+
+#### 5. Forgot Password (Send Code)
+Initiate the password reset process by generating and sending a numeric OTP.
+
+- **URL**: `/password/send-code`
+- **Method**: `POST`
+- **Body Parameters**:
+  | Parameter | Type | Required | Description |
+  |-----------|------|----------|-------------|
+  | `email` | string | Yes | Registered email address |
+
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "message": "Reset code sent successfully.",
+    "debug_otp": 123456
+  }
+  ```
+
+#### 6. Verify Code
+Verify if the OTP is valid and not expired.
+
+- **URL**: `/password/verify-code`
+- **Method**: `POST`
+- **Body Parameters**:
+  | Parameter | Type | Required | Description |
+  |-----------|------|----------|-------------|
+  | `email` | string | Yes | Registered email address |
+  | `otp` | string | Yes | The 6-digit code received |
+
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "message": "OTP verified successfully."
+  }
+  ```
+
+#### 7. Reset Password
+Set a new password using a verified OTP.
+
+- **URL**: `/password/reset`
+- **Method**: `POST`
+- **Body Parameters**:
+  | Parameter | Type | Required | Description |
+  |-----------|------|----------|-------------|
+  | `email` | string | Yes | Registered email address |
+  | `otp` | string | Yes | The 6-digit code |
+  | `password` | string | Yes | New password (min 8 chars) |
+  | `password_confirmation` | string | Yes | Confirm new password |
+
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "message": "Password reset successfully."
+  }
+  ```
+
+#### 8. Change Password
+Allow an authenticated user to change their password.
+
+- **URL**: `/password/change`
+- **Method**: `POST`
+- **Headers**:
+  - `Authorization`: `Bearer <your_token>`
+  - `Accept: application/json`
+- **Body Parameters**:
+  | Parameter | Type | Required | Description |
+  |-----------|------|----------|-------------|
+  | `current_password` | string | Yes | The user's current password |
+  | `new_password` | string | Yes | The new password (min 8 chars) |
+  | `new_password_confirmation` | string | Yes | Confirm new password |
+
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "message": "Password changed successfully."
+  }
+  ```
+
+- **Error Response (400 Bad Request)**:
+  ```json
+  {
+    "message": "Current password does not match."
+  }
+  ```
