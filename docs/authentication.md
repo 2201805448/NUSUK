@@ -57,7 +57,7 @@ Create a new user account and receive an authentication token.
 #### 2. Login
 Authenticate an existing user and receive a new token.
 
-- **URL**: `/login`
+- **URL**: `/login` (Named route: `login`)
 - **Method**: `POST`
 - **Headers**:
   - `Accept: application/json`
