@@ -33,5 +33,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/users/{id}', [\App\Http\Controllers\Api\AdminController::class, 'update']);
         Route::delete('/users/{id}', [\App\Http\Controllers\Api\AdminController::class, 'destroy']);
         Route::patch('/users/{id}/status', [\App\Http\Controllers\Api\AdminController::class, 'updateUserStatus']);
+
+        // Package Management
+        Route::post('/packages', [\App\Http\Controllers\Api\PackageController::class, 'store']);
+        Route::put('/packages/{id}', [\App\Http\Controllers\Api\PackageController::class, 'update']);
+        Route::delete('/packages/{id}', [\App\Http\Controllers\Api\PackageController::class, 'destroy']);
     });
 });
