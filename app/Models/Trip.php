@@ -44,4 +44,10 @@ class Trip extends Model
     {
         return $this->hasMany(Transport::class, 'trip_id', 'trip_id');
     }
+
+    // 🔗 العلاقة مع Activities
+    public function activities()
+    {
+        return $this->hasMany(Activity::class, 'trip_id', 'trip_id');
+    }
 }

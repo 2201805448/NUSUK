@@ -124,6 +124,32 @@ if ($trans1['code'] == 201 && $trans2['code'] == 201) {
     exit(1);
 }
 
+// 3.5 Update Transport
+echo "\n3.5. Updating Transport ID $transId1...\n";
+$updateRes = http_post("/transports/$transId1?_method=PUT", [
+    'notes' => 'Updated Notes VIP',
+    'departure_time' => date('Y-m-d H:i:s', strtotime('+5 hours'))
+], $token);
+
+if ($updateRes['code'] == 200) {
+    echo "Transport Updated Successfully.\n";
+} else {
+    echo "FAILED: Update Transport\n";
+    print_r($updateRes['data']);
+    exit(1);
+}
+
+// 3.6 View Details (Show)
+echo "\n3.6. Viewing Transport Details ID $transId1...\n";
+$showRes = http_get("/transports/$transId1", $token);
+if ($showRes['code'] == 200 && $showRes['data']['notes'] === 'Updated Notes VIP') {
+    echo "View Details Successful. Notes updated correctly.\n";
+} else {
+    echo "FAILED: View Details\n";
+    print_r($showRes['data']);
+    exit(1);
+}
+
 // 4. List Transports
 echo "\n4. Listing Transports for Trip...\n";
 $listRes = http_get("/transports?trip_id=$tripId", $token);

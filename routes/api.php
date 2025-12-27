@@ -54,5 +54,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/trips/{id}', [\App\Http\Controllers\Api\TripController::class, 'show']);
         Route::post('/trips/{id}/hotels', [\App\Http\Controllers\Api\TripController::class, 'addHotel']);
         Route::delete('/trips/{id}/hotels/{accommodation_id}', [\App\Http\Controllers\Api\TripController::class, 'removeHotel']);
+
+        // Activity Management in Trips
+        Route::post('/trips/{id}/activities', [\App\Http\Controllers\Api\TripController::class, 'addActivity']);
+        Route::apiResource('activities', \App\Http\Controllers\Api\ActivityController::class); // Added for update/delete
     });
 });

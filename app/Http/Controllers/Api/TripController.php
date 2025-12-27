@@ -108,4 +108,33 @@ class TripController extends Controller
             'trip' => $trip->load('accommodations')
         ]);
     }
+
+    /**
+     * Add activity (visit) to a trip
+     */
+    public function addActivity(Request $request, $id)
+    {
+        $trip = Trip::findOrFail($id);
+
+        $request->validate([
+            'activity_type' => 'required|string|max:100',
+            'location' => 'required|string|max:150',
+            'activity_date' => 'required|date',
+            'activity_time' => 'required|date_format:H:i',
+            'status' => 'in:SCHEDULED,DONE,CANCELLED',
+        ]);
+
+        $activity = $trip->activities()->create([
+            'activity_type' => $request->activity_type,
+            'location' => $request->location,
+            'activity_date' => $request->activity_date,
+            'activity_time' => $request->activity_time,
+            'status' => $request->status ?? 'SCHEDULED',
+        ]);
+
+        return response()->json([
+            'message' => 'Activity added to trip successfully',
+            'activity' => $activity
+        ]);
+    }
 }
