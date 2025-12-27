@@ -43,6 +43,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('accommodations', \App\Http\Controllers\Api\AccommodationController::class);
         Route::apiResource('rooms', \App\Http\Controllers\Api\RoomController::class);
 
+        // Transportation Management
+        Route::apiResource('transports', \App\Http\Controllers\Api\TransportController::class);
+        Route::apiResource('drivers', \App\Http\Controllers\Api\DriverController::class);
+        Route::apiResource('routes', \App\Http\Controllers\Api\TransportRouteController::class); // Added
+
         // Trip Management (including Hotels in Trips)
         Route::get('/trips', [\App\Http\Controllers\Api\TripController::class, 'index']);
         Route::post('/trips', [\App\Http\Controllers\Api\TripController::class, 'store']); // Added store route

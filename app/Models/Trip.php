@@ -38,4 +38,10 @@ class Trip extends Model
         return $this->belongsToMany(Accommodation::class, 'trip_accommodations', 'trip_id', 'accommodation_id')
             ->withTimestamps();
     }
+
+    // 🔗 العلاقة مع Transports
+    public function transports()
+    {
+        return $this->hasMany(Transport::class, 'trip_id', 'trip_id');
+    }
 }
