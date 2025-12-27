@@ -31,4 +31,11 @@ class Trip extends Model
     {
         return $this->hasMany(Booking::class, 'trip_id', 'trip_id');
     }
+
+    // 🔗 العلاقة مع Accommodations (Hotels)
+    public function accommodations()
+    {
+        return $this->belongsToMany(Accommodation::class, 'trip_accommodations', 'trip_id', 'accommodation_id')
+            ->withTimestamps();
+    }
 }

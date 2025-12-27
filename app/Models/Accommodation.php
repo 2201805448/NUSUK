@@ -39,4 +39,17 @@ class Accommodation extends Model
             'accommodation_id'
         );
     }
+
+    // Accommodation -> Trips (many to many)
+    public function trips()
+    {
+        return $this->belongsToMany(Trip::class, 'trip_accommodations', 'accommodation_id', 'trip_id')
+            ->withTimestamps();
+    }
+
+    // Accommodation -> Rooms (one to many)
+    public function rooms()
+    {
+        return $this->hasMany(Room::class, 'accommodation_id', 'accommodation_id');
+    }
 }
