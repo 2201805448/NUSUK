@@ -8,6 +8,26 @@ use App\Models\Package;
 
 class PackageController extends Controller
 {
+    // List all packages
+    public function index(Request $request)
+    {
+        $query = Package::query();
+
+        // Optional: Filter by active status
+        if ($request->has('is_active')) {
+            $query->where('is_active', filter_var($request->is_active, FILTER_VALIDATE_BOOLEAN));
+        }
+
+        return response()->json($query->get());
+    }
+
+    // Get specific package details
+    public function show($id)
+    {
+        $package = Package::findOrFail($id);
+        return response()->json($package);
+    }
+
     // Store a new package
     public function store(Request $request)
     {

@@ -24,6 +24,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [\App\Http\Controllers\Api\ProfileController::class, 'me']);
     Route::put('/profile', [\App\Http\Controllers\Api\ProfileController::class, 'update']);
 
+    // Packages (Available to all authenticated users)
+    Route::get('/packages', [\App\Http\Controllers\Api\PackageController::class, 'index']);
+    Route::get('/packages/{id}', [\App\Http\Controllers\Api\PackageController::class, 'show']);
+
+    // Bookings
+    Route::post('/bookings', [\App\Http\Controllers\Api\BookingController::class, 'store']);
+    Route::post('/bookings/{id}/request-modification', [\App\Http\Controllers\Api\BookingController::class, 'requestModification']);
+    Route::post('/bookings/{id}/request-cancellation', [\App\Http\Controllers\Api\BookingController::class, 'requestCancellation']);
+
     // Common Routes for Admin and Supervisor
     Route::middleware('role:ADMIN,SUPERVISOR')->group(function () {
         Route::get('/trips', [\App\Http\Controllers\Api\TripController::class, 'index']);
