@@ -13,6 +13,7 @@ class RoomAssignment extends Model
     protected $fillable = [
         'pilgrim_id',
         'accommodation_id',
+        'room_id', // Added
         'check_in',
         'check_out',
         'status',
@@ -27,6 +28,18 @@ class RoomAssignment extends Model
             Accommodation::class,
             'accommodation_id',
             'accommodation_id'
+        );
+    }
+
+    /**
+     * RoomAssignment -> Room
+     */
+    public function room()
+    {
+        return $this->belongsTo(
+            \App\Models\Room::class,
+            'room_id',
+            'id'
         );
     }
 

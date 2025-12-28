@@ -29,4 +29,14 @@ class Pilgrim extends Model
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
+
+    public function groupMembers()
+    {
+        return $this->hasMany(GroupMember::class, 'pilgrim_id', 'pilgrim_id');
+    }
+
+    public function roomAssignments()
+    {
+        return $this->hasMany(RoomAssignment::class, 'pilgrim_id', 'pilgrim_id');
+    }
 }

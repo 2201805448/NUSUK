@@ -23,6 +23,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Profile
     Route::get('/profile', [\App\Http\Controllers\Api\ProfileController::class, 'me']);
     Route::put('/profile', [\App\Http\Controllers\Api\ProfileController::class, 'update']);
+    Route::get('/pilgrim/card', [\App\Http\Controllers\Api\PilgrimCardController::class, 'show']);
 
     // Packages (Available to all authenticated users)
     Route::get('/packages', [\App\Http\Controllers\Api\PackageController::class, 'index']);
@@ -37,6 +38,33 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:ADMIN,SUPERVISOR')->group(function () {
         Route::get('/trips', [\App\Http\Controllers\Api\TripController::class, 'index']);
         Route::get('/trips/{id}', [\App\Http\Controllers\Api\TripController::class, 'show']);
+
+        Route::post('/trips/{id}/groups', [\App\Http\Controllers\Api\GroupController::class, 'store']);
+        Route::get('/trips/{id}/groups', [\App\Http\Controllers\Api\GroupController::class, 'index']); // Use index with trip_id implicitly or explicitly
+        // Actually, store is /trips/{id}/groups, implying nested resource.
+        // My index method handles ?trip_id=... but Route::get('/trips/{id}/groups') passes id.
+        // Wait, Route::get('/trips/{id}/groups', [GroupController::class, 'index']) passes $id as FIRST argument?
+        // If I define it as get('/trips/{id}/groups'), Laravel passes $id.
+        // My index(Request $request) expects request. If I add $id param: index(Request $request, $id = null).
+        // Let's modify api.php to point to a new method OR use a query param on a generic endpoint.
+        // Cleaner: Route::get('/groups', [..,'index']); WITH ?trip_id=...
+
+        Route::get('/groups', [\App\Http\Controllers\Api\GroupController::class, 'index']); // Generic list
+        Route::get('/groups/{id}', [\App\Http\Controllers\Api\GroupController::class, 'show']);
+        Route::put('/groups/{id}', [\App\Http\Controllers\Api\GroupController::class, 'update']);
+        Route::post('/groups/{id}/members', [\App\Http\Controllers\Api\GroupController::class, 'addMember']);
+        Route::post('/groups/{id}/transfer', [\App\Http\Controllers\Api\GroupController::class, 'transferMember']);
+        Route::post('/groups/{id}/remove', [\App\Http\Controllers\Api\GroupController::class, 'removeMember']);
+        Route::put('/groups/{id}/assign-supervisor', [\App\Http\Controllers\Api\GroupController::class, 'assignSupervisor']);
+        Route::put('/groups/{id}/assign-supervisor', [\App\Http\Controllers\Api\GroupController::class, 'assignSupervisor']);
+        Route::put('/groups/{id}/unassign-supervisor', [\App\Http\Controllers\Api\GroupController::class, 'unassignSupervisor']);
+
+        // Monitoring
+        Route::get('/trips/{id}/housing', [\App\Http\Controllers\Api\AccommodationController::class, 'getHousingData']);
+
+        // Room Assignment
+        Route::post('/room-assignments', [\App\Http\Controllers\Api\RoomAssignmentController::class, 'store']);
+        Route::put('/room-assignments/{id}', [\App\Http\Controllers\Api\RoomAssignmentController::class, 'update']);
     });
 
     // Admin Dashboard Routes - No Prefix, Role Restricted
