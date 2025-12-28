@@ -41,8 +41,43 @@ class TripController extends Controller
     // Get specific trip with its hotels
     public function show($id)
     {
-        $trip = Trip::with(['package', 'accommodations'])->findOrFail($id);
+        $trip = Trip::with(['package', 'accommodations', 'transports', 'activities'])->findOrFail($id);
         return response()->json($trip);
+    }
+
+    // Update existing trip
+    public function update(Request $request, $id)
+    {
+        $trip = Trip::findOrFail($id);
+
+        $request->validate([
+            'package_id' => 'sometimes|exists:packages,package_id',
+            'trip_name' => 'sometimes|string|max:150',
+            'start_date' => 'sometimes|date',
+            'end_date' => 'sometimes|date|after_or_equal:start_date',
+            'status' => 'in:PLANNED,ONGOING,COMPLETED,CANCELLED',
+            'capacity' => 'nullable|integer|min:1',
+            'notes' => 'nullable|string',
+        ]);
+
+        $trip->update($request->all());
+
+        return response()->json([
+            'message' => 'Trip updated successfully',
+            'trip' => $trip
+        ]);
+    }
+
+    // Cancel a trip
+    public function cancel($id)
+    {
+        $trip = Trip::findOrFail($id);
+        $trip->update(['status' => 'CANCELLED']);
+
+        return response()->json([
+            'message' => 'Trip cancelled successfully',
+            'trip' => $trip
+        ]);
     }
 
     /**
@@ -121,6 +156,7 @@ class TripController extends Controller
             'location' => 'required|string|max:150',
             'activity_date' => 'required|date',
             'activity_time' => 'required|date_format:H:i',
+            'end_time' => 'nullable|date_format:H:i|after:activity_time',
             'status' => 'in:SCHEDULED,DONE,CANCELLED',
         ]);
 
@@ -129,12 +165,47 @@ class TripController extends Controller
             'location' => $request->location,
             'activity_date' => $request->activity_date,
             'activity_time' => $request->activity_time,
+            'end_time' => $request->end_time,
             'status' => $request->status ?? 'SCHEDULED',
         ]);
 
         return response()->json([
             'message' => 'Activity added to trip successfully',
             'activity' => $activity
+        ]);
+    }
+
+
+    /**
+     * Add transport stage to a trip.
+     * This acts as a stage definition for the trip.
+     */
+    public function addTransport(Request $request, $id)
+    {
+        // Wrapper to reuse Transport logic or create one directly
+        $trip = Trip::findOrFail($id);
+
+        $request->validate([
+            'transport_type' => 'required|string|max:50',
+            'route_from' => 'required|string|max:100',
+            'route_to' => 'required|string|max:100',
+            'departure_time' => 'required|date',
+            'arrival_time' => 'nullable|date|after:departure_time',
+            'notes' => 'nullable|string',
+        ]);
+
+        $transport = $trip->transports()->create([
+            'transport_type' => $request->transport_type,
+            'route_from' => $request->route_from,
+            'route_to' => $request->route_to,
+            'departure_time' => $request->departure_time,
+            'arrival_time' => $request->arrival_time,
+            'notes' => $request->notes,
+        ]);
+
+        return response()->json([
+            'message' => 'Transport stage added to trip successfully',
+            'transport' => $transport
         ]);
     }
 }

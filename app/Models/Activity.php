@@ -14,6 +14,7 @@ class Activity extends Model
         'location',
         'activity_date',
         'activity_time',
+        'end_time',
         'status',
     ];
 

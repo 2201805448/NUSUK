@@ -140,4 +140,31 @@ class AdminController extends Controller
             'user' => $user
         ]);
     }
+    // 8. Trip Status Reports
+    public function tripReports(Request $request)
+    {
+        $query = Trip::query();
+
+        // Filter by Status
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Filter by Time Period (Start Date Range)
+        if ($request->has('date_from')) {
+            $query->whereDate('start_date', '>=', $request->date_from);
+        }
+        if ($request->has('date_to')) {
+            $query->whereDate('start_date', '<=', $request->date_to);
+        }
+
+        // Include Package for context
+        $trips = $query->with('package')->get();
+
+        return response()->json([
+            'count' => $trips->count(),
+            'filters' => $request->only(['status', 'date_from', 'date_to']),
+            'trips' => $trips
+        ]);
+    }
 }
