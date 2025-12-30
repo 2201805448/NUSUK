@@ -24,7 +24,7 @@ class TicketLog extends Model
         return $this->belongsTo(Ticket::class, 'ticket_id', 'ticket_id');
     }
 
-    public function user()
+    public function actionBy()
     {
         return $this->belongsTo(User::class, 'action_by', 'user_id');
     }

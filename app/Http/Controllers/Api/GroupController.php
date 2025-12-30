@@ -22,8 +22,23 @@ class GroupController extends Controller
             $query->where('trip_id', $request->trip_id);
         }
 
-        $groups = $query->get();
+        // Role-based filtering
+        $user = Auth::user();
+        if ($user->role === 'SUPERVISOR') {
+            $query->where('supervisor_id', $user->user_id);
+        }
+        // Admin sees all (no extra filter)
 
+        $groups = $query->get();
+        // DEBUG: Attach role info to first item if exists or wrap response
+        if ($request->has('debug')) {
+            return response()->json([
+                'role' => $user->role,
+                'id' => $user->user_id,
+                'supervisor_id_filter' => ($user->role === 'SUPERVISOR' ? $user->user_id : 'NONE'),
+                'data' => $groups
+            ]);
+        }
         return response()->json($groups);
     }
 

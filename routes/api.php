@@ -25,9 +25,39 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/profile', [\App\Http\Controllers\Api\ProfileController::class, 'update']);
     Route::get('/pilgrim/card', [\App\Http\Controllers\Api\PilgrimCardController::class, 'show']);
 
+    // Messaging
+    Route::post('/messages', [\App\Http\Controllers\Api\MessageController::class, 'store']);
+    Route::get('/messages', [\App\Http\Controllers\Api\MessageController::class, 'index']);
+    Route::get('/messages/{user_id}', [\App\Http\Controllers\Api\MessageController::class, 'show']);
+
+    // Display Notifications (User)
+    Route::get('/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
+    Route::put('/notifications/read-all', [\App\Http\Controllers\Api\NotificationController::class, 'markAllAsRead']);
+    Route::put('/notifications/{id}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
+
+    // Advertisements / Announcements
+    Route::get('/announcements', [\App\Http\Controllers\Api\AnnouncementController::class, 'index']);
+    Route::post('/announcements', [\App\Http\Controllers\Api\AnnouncementController::class, 'store']);
+
+    // Religious Content (Guides & Prayer Times)
+    Route::get('/guides', [\App\Http\Controllers\Api\GuideController::class, 'index']);
+    Route::get('/guides/{id}', [\App\Http\Controllers\Api\GuideController::class, 'show']);
+    Route::post('/guides', [\App\Http\Controllers\Api\GuideController::class, 'store']); // Admin create
+    Route::get('/prayer-times', [\App\Http\Controllers\Api\PrayerTimeController::class, 'index']);
+
+    // Support Tickets
+    Route::get('/support/tickets', [\App\Http\Controllers\Api\SupportTicketController::class, 'index']);
+    Route::post('/support/tickets', [\App\Http\Controllers\Api\SupportTicketController::class, 'store']);
+    Route::get('/support/tickets/{id}', [\App\Http\Controllers\Api\SupportTicketController::class, 'show']);
+    Route::post('/support/tickets/{id}/reply', [\App\Http\Controllers\Api\SupportTicketController::class, 'reply']);
+    Route::post('/support/tickets/{id}/transfer', [\App\Http\Controllers\Api\SupportTicketController::class, 'transfer']);
+    Route::post('/support/tickets/{id}/close', [\App\Http\Controllers\Api\SupportTicketController::class, 'close']);
+
     // Packages (Available to all authenticated users)
     Route::get('/packages', [\App\Http\Controllers\Api\PackageController::class, 'index']);
     Route::get('/packages/{id}', [\App\Http\Controllers\Api\PackageController::class, 'show']);
+    Route::get('/packages/{id}/reviews', [\App\Http\Controllers\Api\PackageController::class, 'getTripReviews']);
+    Route::get('/trips/{id}/hotel-reviews', [\App\Http\Controllers\Api\TripController::class, 'getHotelReviews']);
 
     // Bookings
     Route::post('/bookings', [\App\Http\Controllers\Api\BookingController::class, 'store']);
@@ -39,8 +69,18 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/trips', [\App\Http\Controllers\Api\TripController::class, 'index']);
         Route::get('/trips/{id}', [\App\Http\Controllers\Api\TripController::class, 'show']);
 
+        Route::get('/groups', [\App\Http\Controllers\Api\GroupController::class, 'index']); // General list (filtered by role)
         Route::post('/trips/{id}/groups', [\App\Http\Controllers\Api\GroupController::class, 'store']);
-        Route::get('/trips/{id}/groups', [\App\Http\Controllers\Api\GroupController::class, 'index']); // Use index with trip_id implicitly or explicitly
+        Route::get('/trips/{id}/groups', [\App\Http\Controllers\Api\GroupController::class, 'index']); // Trip-specific
+
+        // Trip Chat
+        Route::get('/trips/{id}/chat', [\App\Http\Controllers\Api\TripChatController::class, 'index']);
+        Route::post('/trips/{id}/chat', [\App\Http\Controllers\Api\TripChatController::class, 'store']);
+
+        // Hotel Reviews (Shared/Auth) - Placing here or in generic auth section? 
+        // User requested "enable pilgrim to view". Pilgrim is Authed User. 
+        // So generic auth group is better. But let's check placement.
+        // The previous attempt was logic: inside auth group.
         // Actually, store is /trips/{id}/groups, implying nested resource.
         // My index method handles ?trip_id=... but Route::get('/trips/{id}/groups') passes id.
         // Wait, Route::get('/trips/{id}/groups', [GroupController::class, 'index']) passes $id as FIRST argument?
@@ -90,6 +130,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Admin Dashboard Routes - No Prefix, Role Restricted
     Route::middleware('role:ADMIN')->group(function () {
         Route::get('/stats', [\App\Http\Controllers\Api\AdminController::class, 'stats']);
+        Route::get('/general-stats', [\App\Http\Controllers\Api\AdminController::class, 'generalStats']);
         Route::get('/users', [\App\Http\Controllers\Api\AdminController::class, 'users']);
         Route::post('/users', [\App\Http\Controllers\Api\AdminController::class, 'store']);
         Route::get('/users/{id}', [\App\Http\Controllers\Api\AdminController::class, 'show']);
@@ -99,6 +140,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Reports
         Route::get('/reports/trips', [\App\Http\Controllers\Api\AdminController::class, 'tripReports']);
+        Route::get('/reports/trips/export', [\App\Http\Controllers\Api\ReportController::class, 'exportTrips']);
 
         // Package Management
         Route::post('/packages', [\App\Http\Controllers\Api\PackageController::class, 'store']);

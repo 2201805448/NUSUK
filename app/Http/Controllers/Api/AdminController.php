@@ -167,4 +167,67 @@ class AdminController extends Controller
             'trips' => $trips
         ]);
     }
+    // 9. General Statistics (Aggregated)
+    public function generalStats()
+    {
+        $bookingsStats = [
+            'total' => Booking::count(),
+            'breakdown' => Booking::select('status', \Illuminate\Support\Facades\DB::raw('count(*) as count'))
+                ->groupBy('status')
+                ->get()
+        ];
+
+        $tripsStats = [
+            'total' => Trip::count(),
+            'breakdown' => Trip::select('status', \Illuminate\Support\Facades\DB::raw('count(*) as count'))
+                ->groupBy('status')
+                ->get()
+        ];
+
+        $activitiesStats = [
+            'total' => \App\Models\Activity::count(),
+            'breakdown' => \App\Models\Activity::select('status', \Illuminate\Support\Facades\DB::raw('count(*) as count'))
+                ->groupBy('status')
+                ->get()
+        ];
+
+        // Attendance Rates
+        $attendanceStats = \App\Models\AttendanceTracking::select('status_type', \Illuminate\Support\Facades\DB::raw('count(*) as count'))
+            ->groupBy('status_type')
+            ->get();
+
+        $totalAttendanceRecords = $attendanceStats->sum('count');
+        // Calculate rough "presence" rate (Arrivals / Total Records) - heuristic
+        $arrivalCount = $attendanceStats->where('status_type', 'ARRIVAL')->first()->count ?? 0;
+        $attendanceRate = $totalAttendanceRecords > 0 ? round(($arrivalCount / $totalAttendanceRecords) * 100, 2) : 0;
+
+        // Evaluations
+        $evaluationStats = [
+            'average_score' => \App\Models\Evaluation::avg('score'),
+            'count' => \App\Models\Evaluation::count(),
+            'breakdown' => \App\Models\Evaluation::select('type', \Illuminate\Support\Facades\DB::raw('avg(score) as average_score'), \Illuminate\Support\Facades\DB::raw('count(*) as count'))
+                ->groupBy('type')
+                ->get()
+        ];
+
+        // Packages
+        $packagesStats = [
+            'total' => \App\Models\Package::count(),
+            'active' => \App\Models\Package::where('is_active', true)->count(),
+            'inactive' => \App\Models\Package::where('is_active', false)->count(),
+        ];
+
+        return response()->json([
+            'bookings' => $bookingsStats,
+            'packages' => $packagesStats,
+            'trips' => $tripsStats,
+            'activities' => $activitiesStats,
+            'attendance' => [
+                'breakdown' => $attendanceStats,
+                'total_records' => $totalAttendanceRecords,
+                'arrival_rate_percentage' => $attendanceRate
+            ],
+            'evaluations' => $evaluationStats
+        ]);
+    }
 }

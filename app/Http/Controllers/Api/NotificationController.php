@@ -146,6 +146,47 @@ class NotificationController extends Controller
         return response()->json(['message' => 'Notification sent to ' . count($userIds) . ' users in the group.']);
     }
 
+    /**
+     * Get user's notifications.
+     */
+    public function index(Request $request)
+    {
+        $notifications = Notification::where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        return response()->json($notifications);
+    }
+
+    /**
+     * Mark a specific notification as read.
+     */
+    public function markAsRead(Request $request, $id)
+    {
+        $notification = Notification::where('user_id', Auth::id())
+            ->where('notification_id', $id)
+            ->firstOrFail();
+
+        $notification->is_read = true;
+        $notification->save(); // Model doesn't have timestamps, so save() is fine (created_at is manual). 
+        // Note: Notification model has $timestamps = false.
+
+        $notification->update(['is_read' => true]);
+
+        return response()->json(['message' => 'Notification marked as read.']);
+    }
+
+    /**
+     * Mark all notifications as read.
+     */
+    public function markAllAsRead(Request $request)
+    {
+        Notification::where('user_id', Auth::id())
+            ->update(['is_read' => true]);
+
+        return response()->json(['message' => 'All notifications marked as read.']);
+    }
+
     private function authorizeAdmin()
     {
         if (Auth::user()->role !== 'ADMIN') {

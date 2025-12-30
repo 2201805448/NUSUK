@@ -208,4 +208,34 @@ class TripController extends Controller
             'transport' => $transport
         ]);
     }
+
+    /**
+     * Get hotel reviews for the trip.
+     * Returns anonymous reviews for hotels linked to this trip.
+     */
+    public function getHotelReviews($id)
+    {
+        $trip = Trip::with('accommodations')->findOrFail($id);
+        $reviews = [];
+
+        foreach ($trip->accommodations as $hotel) {
+            // Find evaluations for this hotel (target_id) where type='HOTEL' and internal_only=0
+            $hotelReviews = \App\Models\Evaluation::where('type', 'HOTEL')
+                ->where('target_id', $hotel->accommodation_id)
+                ->where('internal_only', 0)
+                ->select('score', 'concern_text', 'created_at') // Select only non-identifying fields
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            if ($hotelReviews->count() > 0) {
+                $reviews[] = [
+                    'hotel_name' => $hotel->hotel_name,
+                    'city' => $hotel->city,
+                    'reviews' => $hotelReviews
+                ];
+            }
+        }
+
+        return response()->json($reviews);
+    }
 }

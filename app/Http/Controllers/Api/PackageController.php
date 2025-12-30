@@ -93,4 +93,29 @@ class PackageController extends Controller
             'message' => 'Package deleted successfully'
         ]);
     }
+
+    /**
+     * Get reviews for trips associated with this package.
+     * Returns anonymous reviews.
+     */
+    public function getTripReviews($id)
+    {
+        $package = Package::findOrFail($id);
+
+        // Get all trip IDs for this package
+        $tripIds = \App\Models\Trip::where('package_id', $id)->pluck('trip_id');
+
+        // Find evaluations where type='TRIP' and target_id IN $tripIds and internal_only=0
+        $reviews = \App\Models\Evaluation::where('type', 'TRIP')
+            ->whereIn('target_id', $tripIds)
+            ->where('internal_only', 0)
+            ->select('score', 'concern_text', 'created_at') // Anonymous
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'package_name' => $package->package_name,
+            'reviews' => $reviews
+        ]);
+    }
 }
