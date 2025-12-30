@@ -29,7 +29,7 @@ class ActivityController extends Controller
             'location' => 'sometimes|string|max:150',
             'activity_date' => 'sometimes|date',
             'activity_time' => 'sometimes|date_format:H:i',
-            'status' => 'in:SCHEDULED,DONE,CANCELLED',
+            'status' => 'in:SCHEDULED,IN_PROGRESS,DONE,CANCELLED',
         ]);
 
         $activity->update($request->all());

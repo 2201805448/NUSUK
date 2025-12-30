@@ -23,7 +23,9 @@ This document details the functions available for managing program activities (v
   - `location` (string, optional): Update location.
   - `activity_time` (time, optional): Update time.
   - `activity_date` (date, optional): Update date.
-  - `status` (string, optional): Update status.
+  - `status` (string, optional): Update status. Allowed values: `SCHEDULED`, `IN_PROGRESS`, `DONE`, `CANCELLED`.
+  
+**Note**: This endpoint is available to **Supervisors** and **Admins** to enable real-time tracking of trip activities.
 
 ## 3. Delete Activity
 **Description**: Remove an activity or visit from the program (e.g., if cancelled).

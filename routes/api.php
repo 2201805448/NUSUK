@@ -65,6 +65,26 @@ Route::middleware('auth:sanctum')->group(function () {
         // Room Assignment
         Route::post('/room-assignments', [\App\Http\Controllers\Api\RoomAssignmentController::class, 'store']);
         Route::put('/room-assignments/{id}', [\App\Http\Controllers\Api\RoomAssignmentController::class, 'update']);
+
+        // Activity Management (Shared)
+        Route::apiResource('activities', \App\Http\Controllers\Api\ActivityController::class)->except(['store']); // Store is under trips/{id}/activities
+
+        // Pilgrim Notes
+        Route::post('/pilgrims/{id}/notes', [\App\Http\Controllers\Api\SupervisorNoteController::class, 'store']);
+
+        // Attendance Tracking
+        Route::post('/pilgrims/{id}/attendance', [\App\Http\Controllers\Api\AttendanceController::class, 'store']);
+        Route::get('/trips/{id}/attendance-reports', [\App\Http\Controllers\Api\AttendanceController::class, 'getTripReports']);
+
+        // Notifications
+        Route::post('/notifications/general', [\App\Http\Controllers\Api\NotificationController::class, 'sendGeneral']);
+        Route::post('/trips/{id}/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'sendTrip']);
+        Route::post('/groups/{id}/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'sendGroup']);
+
+        // Trip Updates (Feed)
+        Route::post('/trips/{id}/updates', [\App\Http\Controllers\Api\TripUpdateController::class, 'store']);
+        Route::get('/trips/{id}/updates', [\App\Http\Controllers\Api\TripUpdateController::class, 'index']);
+
     });
 
     // Admin Dashboard Routes - No Prefix, Role Restricted
@@ -106,6 +126,6 @@ Route::middleware('auth:sanctum')->group(function () {
         // Activity Management in Trips
         Route::post('/trips/{id}/activities', [\App\Http\Controllers\Api\TripController::class, 'addActivity']);
         Route::post('/trips/{id}/transports', [\App\Http\Controllers\Api\TripController::class, 'addTransport']); // Added for stages
-        Route::apiResource('activities', \App\Http\Controllers\Api\ActivityController::class); // Added for update/delete
+        // Route::apiResource('activities', \App\Http\Controllers\Api\ActivityController::class); // Moved to shared group
     });
 });
