@@ -32,4 +32,15 @@ class GroupTrip extends Model
     {
         return $this->hasMany(GroupMember::class, 'group_id', 'group_id');
     }
+
+    public function accommodations()
+    {
+        return $this->belongsToMany(
+            Accommodation::class,
+            'group_accommodations',
+            'group_id',
+            'accommodation_id'
+        )->withPivot('check_in_date', 'check_out_date', 'notes', 'assigned_by')
+            ->withTimestamps();
+    }
 }

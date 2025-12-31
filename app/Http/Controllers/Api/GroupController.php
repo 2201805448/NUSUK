@@ -314,4 +314,138 @@ class GroupController extends Controller
             'group' => $group
         ]);
     }
+
+    /**
+     * List pilgrims in a specific group (for Supervisor/Admin)
+     */
+    public function listPilgrims($id)
+    {
+        $group = GroupTrip::with(['trip', 'supervisor', 'members.pilgrim.user'])
+            ->findOrFail($id);
+
+        // Authorization: Must be supervisor of this group or Admin
+        if (Auth::user()->role !== 'ADMIN' && $group->supervisor_id !== Auth::id()) {
+            return response()->json(['message' => 'Unauthorized access to this group.'], 403);
+        }
+
+        // Format pilgrims list
+        $pilgrims = $group->members->map(function ($member) {
+            $pilgrim = $member->pilgrim;
+            $user = $pilgrim ? $pilgrim->user : null;
+
+            return [
+                'pilgrim_id' => $pilgrim->pilgrim_id ?? null,
+                'user_id' => $user->user_id ?? null,
+                'full_name' => $user->full_name ?? $pilgrim->passport_name ?? 'Unknown',
+                'email' => $user->email ?? null,
+                'phone_number' => $user->phone_number ?? null,
+                'passport_name' => $pilgrim->passport_name ?? null,
+                'passport_number' => $pilgrim->passport_number ?? null,
+                'nationality' => $pilgrim->nationality ?? null,
+                'gender' => $pilgrim->gender ?? null,
+                'date_of_birth' => $pilgrim->date_of_birth ?? null,
+                'emergency_call' => $pilgrim->emergency_call ?? null,
+                'join_date' => $member->join_date,
+                'member_status' => $member->member_status,
+            ];
+        });
+
+        // Filter by status (active only by default)
+        $activePilgrims = $pilgrims->where('member_status', 'ACTIVE');
+        $removedPilgrims = $pilgrims->where('member_status', 'REMOVED');
+
+        return response()->json([
+            'message' => 'Pilgrims list retrieved successfully.',
+            'group' => [
+                'group_id' => $group->group_id,
+                'group_code' => $group->group_code,
+                'group_status' => $group->group_status,
+                'trip' => $group->trip ? [
+                    'trip_id' => $group->trip->trip_id,
+                    'trip_name' => $group->trip->trip_name,
+                    'start_date' => $group->trip->start_date,
+                    'end_date' => $group->trip->end_date,
+                ] : null,
+                'supervisor' => $group->supervisor ? [
+                    'user_id' => $group->supervisor->user_id,
+                    'full_name' => $group->supervisor->full_name,
+                ] : null,
+            ],
+            'summary' => [
+                'total_pilgrims' => $pilgrims->count(),
+                'active_pilgrims' => $activePilgrims->count(),
+                'removed_pilgrims' => $removedPilgrims->count(),
+            ],
+            'pilgrims' => $activePilgrims->values(),
+        ]);
+    }
+
+    /**
+     * List all pilgrims in groups supervised by the current supervisor
+     * OR all pilgrims in a trip (for Admin)
+     */
+    public function listAllPilgrims(Request $request)
+    {
+        $user = Auth::user();
+
+        $query = GroupTrip::with(['trip', 'members.pilgrim.user']);
+
+        // Filter by trip if provided
+        if ($request->has('trip_id')) {
+            $query->where('trip_id', $request->trip_id);
+        }
+
+        // Role-based filtering
+        if ($user->role === 'SUPERVISOR') {
+            $query->where('supervisor_id', $user->user_id);
+        }
+        // Admin sees all groups
+
+        $groups = $query->get();
+
+        // Collect all pilgrims across groups
+        $allPilgrims = collect();
+
+        foreach ($groups as $group) {
+            foreach ($group->members as $member) {
+                $pilgrim = $member->pilgrim;
+                $pilgrimUser = $pilgrim ? $pilgrim->user : null;
+
+                $allPilgrims->push([
+                    'pilgrim_id' => $pilgrim->pilgrim_id ?? null,
+                    'user_id' => $pilgrimUser->user_id ?? null,
+                    'full_name' => $pilgrimUser->full_name ?? $pilgrim->passport_name ?? 'Unknown',
+                    'email' => $pilgrimUser->email ?? null,
+                    'phone_number' => $pilgrimUser->phone_number ?? null,
+                    'passport_name' => $pilgrim->passport_name ?? null,
+                    'nationality' => $pilgrim->nationality ?? null,
+                    'gender' => $pilgrim->gender ?? null,
+                    'group_id' => $group->group_id,
+                    'group_code' => $group->group_code,
+                    'trip_id' => $group->trip_id,
+                    'trip_name' => $group->trip->trip_name ?? null,
+                    'join_date' => $member->join_date,
+                    'member_status' => $member->member_status,
+                ]);
+            }
+        }
+
+        // Filter active only
+        $activePilgrims = $allPilgrims->where('member_status', 'ACTIVE');
+
+        return response()->json([
+            'message' => 'All pilgrims retrieved successfully.',
+            'filter' => [
+                'trip_id' => $request->trip_id ?? 'all',
+                'role' => $user->role,
+            ],
+            'summary' => [
+                'total_groups' => $groups->count(),
+                'total_pilgrims' => $allPilgrims->count(),
+                'active_pilgrims' => $activePilgrims->count(),
+            ],
+            'pilgrims' => $activePilgrims->values(),
+        ]);
+    }
 }
+

@@ -11,6 +11,122 @@ use Illuminate\Support\Str;
 
 class BookingController extends Controller
 {
+    /**
+     * View all bookings for the authenticated user (Booking History)
+     * Returns current and past bookings with status and basic data
+     */
+    public function index(Request $request)
+    {
+        $user = Auth::user();
+
+        $query = Booking::where('user_id', $user->user_id)
+            ->with(['package', 'trip']);
+
+        // Optional: Filter by status
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Order by booking date (most recent first)
+        $bookings = $query->orderBy('booking_date', 'desc')->get();
+
+        // Categorize bookings
+        $currentBookings = $bookings->filter(function ($booking) {
+            return in_array($booking->status, ['PENDING', 'CONFIRMED'])
+                && ($booking->trip && $booking->trip->end_date >= now());
+        });
+
+        $pastBookings = $bookings->filter(function ($booking) {
+            return $booking->status === 'CANCELLED'
+                || ($booking->trip && $booking->trip->end_date < now());
+        });
+
+        $formattedBookings = $bookings->map(function ($booking) {
+            return [
+                'booking_id' => $booking->booking_id,
+                'booking_ref' => $booking->booking_ref,
+                'booking_date' => $booking->booking_date,
+                'status' => $booking->status,
+                'total_price' => $booking->total_price,
+                'pay_method' => $booking->pay_method,
+                'package' => $booking->package ? [
+                    'package_id' => $booking->package->package_id,
+                    'package_name' => $booking->package->package_name ?? null,
+                    'duration_days' => $booking->package->duration_days ?? null,
+                ] : null,
+                'trip' => $booking->trip ? [
+                    'trip_id' => $booking->trip->trip_id,
+                    'trip_name' => $booking->trip->trip_name ?? null,
+                    'start_date' => $booking->trip->start_date ?? null,
+                    'end_date' => $booking->trip->end_date ?? null,
+                    'trip_status' => $booking->trip->trip_status ?? null,
+                ] : null,
+                'request_notes' => $booking->request_notes,
+                'admin_reply' => $booking->admin_reply,
+            ];
+        });
+
+        return response()->json([
+            'message' => 'Booking history retrieved successfully.',
+            'total_count' => $bookings->count(),
+            'current_count' => $currentBookings->count(),
+            'past_count' => $pastBookings->count(),
+            'bookings' => $formattedBookings
+        ]);
+    }
+
+    /**
+     * View a specific booking details
+     */
+    public function show($id)
+    {
+        $user = Auth::user();
+
+        $booking = Booking::where('user_id', $user->user_id)
+            ->with(['package', 'trip', 'payments'])
+            ->find($id);
+
+        if (!$booking) {
+            return response()->json(['message' => 'Booking not found.'], 404);
+        }
+
+        return response()->json([
+            'message' => 'Booking details retrieved successfully.',
+            'booking' => [
+                'booking_id' => $booking->booking_id,
+                'booking_ref' => $booking->booking_ref,
+                'booking_date' => $booking->booking_date,
+                'status' => $booking->status,
+                'total_price' => $booking->total_price,
+                'pay_method' => $booking->pay_method,
+                'request_notes' => $booking->request_notes,
+                'admin_reply' => $booking->admin_reply,
+                'package' => $booking->package ? [
+                    'package_id' => $booking->package->package_id,
+                    'package_name' => $booking->package->package_name ?? null,
+                    'duration_days' => $booking->package->duration_days ?? null,
+                    'price' => $booking->package->price ?? null,
+                    'services' => $booking->package->services ?? null,
+                ] : null,
+                'trip' => $booking->trip ? [
+                    'trip_id' => $booking->trip->trip_id,
+                    'trip_name' => $booking->trip->trip_name ?? null,
+                    'start_date' => $booking->trip->start_date ?? null,
+                    'end_date' => $booking->trip->end_date ?? null,
+                    'trip_status' => $booking->trip->trip_status ?? null,
+                ] : null,
+                'payments' => $booking->payments->map(function ($payment) {
+                    return [
+                        'payment_id' => $payment->payment_id ?? null,
+                        'amount' => $payment->amount ?? null,
+                        'payment_date' => $payment->payment_date ?? null,
+                        'status' => $payment->status ?? null,
+                    ];
+                }),
+            ]
+        ]);
+    }
+
     // Execute a booking (Create)
     public function store(Request $request)
     {

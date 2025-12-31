@@ -20,7 +20,35 @@ This document outlines the API endpoints for Pilgrims to manage their packages a
 - **Parameters**:
   - `id` (Required, Integer): ID of the package in the URL path.
 
-## 3. Booking Execution
+## 3. View Booking History
+**Description**: View all bookings for the authenticated pilgrim, including current and past bookings with status and basic data.
+
+- **Endpoint**: `GET /api/bookings`
+- **Method**: `GET`
+- **Authorization**: Authenticated Users (Pilgrim)
+- **Parameters**:
+  - `status` (Optional, String): Filter by booking status (`PENDING`, `CONFIRMED`, `CANCELLED`).
+- **Response Includes**:
+  - `total_count`: Total number of bookings
+  - `current_count`: Number of current/active bookings
+  - `past_count`: Number of past/cancelled bookings
+  - `bookings`: Array of booking objects with package and trip details
+
+## 4. View Booking Details
+**Description**: View detailed information about a specific booking.
+
+- **Endpoint**: `GET /api/bookings/{id}`
+- **Method**: `GET`
+- **Authorization**: Authenticated Users (Pilgrim - Booking Owner)
+- **Parameters**:
+  - `id` (Required, Integer): ID of the booking in the URL path.
+- **Response Includes**:
+  - Booking details (ref, date, status, price, payment method)
+  - Package details (name, duration, price, services)
+  - Trip details (name, dates, status)
+  - Payment history
+
+## 5. Booking Execution
 **Description**: Execute a booking process for a specific trip.
 
 - **Endpoint**: `POST /api/bookings`
@@ -31,7 +59,7 @@ This document outlines the API endpoints for Pilgrims to manage their packages a
   - `pay_method` (Optional, String): Payment method (e.g., 'Credit Card').
   - `request_notes` (Optional, String): Any special requests.
 
-## 4. Booking Modification Request
+## 6. Booking Modification Request
 **Description**: Request a modification to booking data (e.g., companions, duration), subject to management approval.
 
 - **Endpoint**: `POST /api/bookings/{id}/request-modification`
@@ -41,7 +69,7 @@ This document outlines the API endpoints for Pilgrims to manage their packages a
   - `request_type` (Required, String): Type of modification (e.g., 'CHANGE_COMPANIONS').
   - `request_data` (Required, JSON/Array): Details of the change (e.g., `{'add_guest': 'Name'}`).
 
-## 5. Booking Cancellation Request
+## 7. Booking Cancellation Request
 **Description**: Request to cancel a booking, subject to management approval.
 
 - **Endpoint**: `POST /api/bookings/{id}/request-cancellation`

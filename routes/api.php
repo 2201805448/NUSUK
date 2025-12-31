@@ -38,6 +38,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Advertisements / Announcements
     Route::get('/announcements', [\App\Http\Controllers\Api\AnnouncementController::class, 'index']);
     Route::post('/announcements', [\App\Http\Controllers\Api\AnnouncementController::class, 'store']);
+    Route::put('/announcements/{id}', [\App\Http\Controllers\Api\AnnouncementController::class, 'update']);
+    Route::get('/announcements/{id}', [\App\Http\Controllers\Api\AnnouncementController::class, 'show']);
+    Route::delete('/announcements/{id}', [\App\Http\Controllers\Api\AnnouncementController::class, 'destroy']);
 
     // Religious Content (Guides & Prayer Times)
     Route::get('/guides', [\App\Http\Controllers\Api\GuideController::class, 'index']);
@@ -60,9 +63,34 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/trips/{id}/hotel-reviews', [\App\Http\Controllers\Api\TripController::class, 'getHotelReviews']);
 
     // Bookings
+    Route::get('/bookings', [\App\Http\Controllers\Api\BookingController::class, 'index']);
+    Route::get('/bookings/{id}', [\App\Http\Controllers\Api\BookingController::class, 'show']);
     Route::post('/bookings', [\App\Http\Controllers\Api\BookingController::class, 'store']);
     Route::post('/bookings/{id}/request-modification', [\App\Http\Controllers\Api\BookingController::class, 'requestModification']);
     Route::post('/bookings/{id}/request-cancellation', [\App\Http\Controllers\Api\BookingController::class, 'requestCancellation']);
+
+    // Activity Log (Pilgrim's trip and activity history)
+    Route::get('/activity-log', [\App\Http\Controllers\Api\ActivityLogController::class, 'index']);
+    Route::get('/activity-log/trips/{trip_id}', [\App\Http\Controllers\Api\ActivityLogController::class, 'show']);
+
+    // Trip Schedule (Full timeline view for pilgrims)
+    Route::get('/trips/{trip_id}/schedule', [\App\Http\Controllers\Api\TripScheduleController::class, 'show']);
+    Route::get('/trips/{trip_id}/schedule/today', [\App\Http\Controllers\Api\TripScheduleController::class, 'today']);
+
+    // Pilgrim Accommodation Details
+    Route::get('/my-accommodations', [\App\Http\Controllers\Api\PilgrimAccommodationController::class, 'index']);
+    Route::get('/my-accommodations/current', [\App\Http\Controllers\Api\PilgrimAccommodationController::class, 'current']);
+    Route::get('/trips/{trip_id}/my-accommodations', [\App\Http\Controllers\Api\PilgrimAccommodationController::class, 'forTrip']);
+    Route::get('/trips/{trip_id}/my-housing', [\App\Http\Controllers\Api\PilgrimAccommodationController::class, 'housing']);
+
+    // Trip Documents (Download for Pilgrims)
+    Route::get('/trips/{trip_id}/documents', [\App\Http\Controllers\Api\TripDocumentController::class, 'index']);
+    Route::get('/trips/{trip_id}/documents/{document_id}', [\App\Http\Controllers\Api\TripDocumentController::class, 'show']);
+    Route::get('/trips/{trip_id}/documents/{document_id}/download', [\App\Http\Controllers\Api\TripDocumentController::class, 'download']);
+
+    // Pilgrim Notes (Submissions by Pilgrims)
+    Route::post('/my-notes', [\App\Http\Controllers\Api\PilgrimNoteController::class, 'store']);
+    Route::get('/my-notes', [\App\Http\Controllers\Api\PilgrimNoteController::class, 'myNotes']);
 
     // Common Routes for Admin and Supervisor
     Route::middleware('role:ADMIN,SUPERVISOR')->group(function () {
@@ -72,6 +100,26 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/groups', [\App\Http\Controllers\Api\GroupController::class, 'index']); // General list (filtered by role)
         Route::post('/trips/{id}/groups', [\App\Http\Controllers\Api\GroupController::class, 'store']);
         Route::get('/trips/{id}/groups', [\App\Http\Controllers\Api\GroupController::class, 'index']); // Trip-specific
+
+        // Pilgrims List (for Supervisor viewing their pilgrims)
+        Route::get('/my-pilgrims', [\App\Http\Controllers\Api\GroupController::class, 'listAllPilgrims']); // All pilgrims in supervisor's groups
+        Route::get('/groups/{id}/pilgrims', [\App\Http\Controllers\Api\GroupController::class, 'listPilgrims']); // Pilgrims in specific group
+
+        // View Pilgrim Notes (for Supervisor/Admin)
+        Route::get('/pilgrim-notes', [\App\Http\Controllers\Api\PilgrimNoteController::class, 'index']);
+        Route::get('/pilgrim-notes/{note_id}', [\App\Http\Controllers\Api\PilgrimNoteController::class, 'show']);
+        Route::post('/pilgrim-notes/{note_id}/respond', [\App\Http\Controllers\Api\PilgrimNoteController::class, 'respond']);
+
+        // Group Accommodations (Link accommodation to groups)
+        Route::get('/groups/{group_id}/accommodations', [\App\Http\Controllers\Api\GroupAccommodationController::class, 'index']);
+        Route::post('/groups/{group_id}/accommodations', [\App\Http\Controllers\Api\GroupAccommodationController::class, 'link']);
+        Route::put('/groups/{group_id}/accommodations/{accommodation_id}', [\App\Http\Controllers\Api\GroupAccommodationController::class, 'update']);
+        Route::delete('/groups/{group_id}/accommodations/{accommodation_id}', [\App\Http\Controllers\Api\GroupAccommodationController::class, 'unlink']);
+        Route::post('/group-accommodations/bulk-link', [\App\Http\Controllers\Api\GroupAccommodationController::class, 'bulkLink']);
+
+        // Trip Documents (Upload)
+        Route::post('/trips/{trip_id}/documents', [\App\Http\Controllers\Api\TripDocumentController::class, 'store']);
+        Route::delete('/trips/{trip_id}/documents/{document_id}', [\App\Http\Controllers\Api\TripDocumentController::class, 'destroy']);
 
         // Trip Chat
         Route::get('/trips/{id}/chat', [\App\Http\Controllers\Api\TripChatController::class, 'index']);
@@ -124,6 +172,10 @@ Route::middleware('auth:sanctum')->group(function () {
         // Trip Updates (Feed)
         Route::post('/trips/{id}/updates', [\App\Http\Controllers\Api\TripUpdateController::class, 'store']);
         Route::get('/trips/{id}/updates', [\App\Http\Controllers\Api\TripUpdateController::class, 'index']);
+
+        // Pilgrim Documents Review
+        Route::get('/pilgrims/documents', [\App\Http\Controllers\Api\PilgrimDocumentController::class, 'index']);
+        Route::get('/pilgrims/{id}/documents', [\App\Http\Controllers\Api\PilgrimDocumentController::class, 'show']);
 
     });
 
