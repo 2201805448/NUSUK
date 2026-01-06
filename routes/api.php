@@ -176,6 +176,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Pilgrim Documents Review
         Route::get('/pilgrims/documents', [\App\Http\Controllers\Api\PilgrimDocumentController::class, 'index']);
         Route::get('/pilgrims/{id}/documents', [\App\Http\Controllers\Api\PilgrimDocumentController::class, 'show']);
+        Route::put('/pilgrims/{id}/documents', [\App\Http\Controllers\Api\PilgrimDocumentController::class, 'update']); // Authorization logic is also in controller
 
     });
 

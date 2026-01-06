@@ -184,4 +184,52 @@ class PilgrimDocumentController extends Controller
             ]
         ]);
     }
+    /**
+     * Update pilgrim documents.
+     * ADMIN: Can update any pilgrim's documents.
+     * SUPERVISOR: Read-only access.
+     */
+    public function update(Request $request, $id)
+    {
+        $user = Auth::user();
+
+        if ($user->role !== 'ADMIN') {
+            return response()->json(['message' => 'Unauthorized. Read-only access.'], 403);
+        }
+
+        $pilgrim = Pilgrim::find($id);
+
+        if (!$pilgrim) {
+            return response()->json(['message' => 'Pilgrim not found.'], 404);
+        }
+
+        $request->validate([
+            'passport_name' => 'sometimes|string|max:150', // DB limit 150
+            'passport_number' => 'sometimes|string|max:50',
+            'passport_img' => 'nullable|string', // Nullable in DB
+            'visa_img' => 'nullable|string', // Nullable in DB
+            'nationality' => 'sometimes|string|max:100',
+            'date_of_birth' => 'nullable|date',
+            'gender' => 'nullable|in:MALE,FEMALE',
+            'emergency_call' => 'nullable|string|max:100', // DB limit 100
+            'notes' => 'nullable|string',
+        ]);
+
+        $pilgrim->update($request->only([
+            'passport_name',
+            'passport_number',
+            'passport_img',
+            'visa_img',
+            'nationality',
+            'date_of_birth',
+            'gender',
+            'emergency_call',
+            'notes',
+        ]));
+
+        return response()->json([
+            'message' => 'Pilgrim documents updated successfully.',
+            'data' => $pilgrim
+        ]);
+    }
 }
