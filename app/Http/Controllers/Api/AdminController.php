@@ -60,7 +60,7 @@ class AdminController extends Controller
             'phone_number' => 'required|string|max:30',
             'password' => 'required|string|min:8',
             'role' => 'required|in:ADMIN,USER,SUPERVISOR,SUPPORT,PILGRIM',
-            'account_status' => 'required|in:ACTIVE,INACTIVE,BLOCKED'
+            'account_status' => 'sometimes|in:ACTIVE,INACTIVE,BLOCKED'
         ]);
 
         $user = User::create([
@@ -69,7 +69,7 @@ class AdminController extends Controller
             'phone_number' => $request->phone_number,
             'password' => \Illuminate\Support\Facades\Hash::make($request->password),
             'role' => $request->role,
-            'account_status' => $request->account_status,
+            'account_status' => $request->account_status ?? 'ACTIVE',
         ]);
 
         return response()->json([
