@@ -53,7 +53,7 @@ $token = $body['token'];
 echo "User Registered.\n\n";
 
 echo "2. Updating Profile (Name & Phone)...\n";
-$update = callApi($baseUrl . '/profile', 'PUT', [
+$update = callApi($baseUrl . '/user/profile', 'PUT', [
     'full_name' => 'Updated Name',
     'phone_number' => '9999999999',
     'role' => 'ADMIN' // Should be ignored

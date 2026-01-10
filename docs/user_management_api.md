@@ -15,7 +15,7 @@ This document details the User Management API endpoints. These endpoints are str
 ### 1. Get My Profile
 Retrieve the authenticated user's profile, including pilgrim details and service history.
 
-- **URL**: `/api/profile`
+- **URL**: `/api/user/profile`
 - **Method**: `GET`
 - **Success Response (200 OK)**:
   ```json

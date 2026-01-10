@@ -49,7 +49,7 @@ $token = $body['token'];
 echo "User Registered.\n\n";
 
 echo "2. Fetching Profile...\n";
-$profile = callApi($baseUrl . '/profile', 'GET', [], $token);
+$profile = callApi($baseUrl . '/user/profile', 'GET', [], $token);
 echo "Response Code: " . $profile['code'] . "\n";
 echo "Response: " . $profile['body'] . "\n";
 

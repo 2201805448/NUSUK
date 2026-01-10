@@ -21,8 +21,8 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Profile
-    Route::get('/profile', [\App\Http\Controllers\Api\ProfileController::class, 'me']);
-    Route::put('/profile', [\App\Http\Controllers\Api\ProfileController::class, 'update']);
+    Route::get('/user/profile', [\App\Http\Controllers\Api\ProfileController::class, 'me']);
+    Route::put('/user/profile', [\App\Http\Controllers\Api\ProfileController::class, 'update']);
     Route::get('/pilgrim/card', [\App\Http\Controllers\Api\PilgrimCardController::class, 'show']);
 
     // Messaging
