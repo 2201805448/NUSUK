@@ -21,6 +21,7 @@ return new class extends Migration {
             // Optional: override the hotel's room type if this specific room is different, 
             // or if the accommodation is just "Hilton" and this is "Suite 101"
             $table->string('room_type', 50)->nullable();
+            $table->integer('capacity')->nullable();
 
             $table->enum('status', ['AVAILABLE', 'OCCUPIED', 'MAINTENANCE', 'CLEANING'])
                 ->default('AVAILABLE');

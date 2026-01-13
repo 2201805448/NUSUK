@@ -29,6 +29,9 @@ class AccommodationController extends Controller
             'room_type' => 'required|string|max:50',
             'capacity' => 'required|integer|min:1',
             'notes' => 'nullable|string',
+            'start' => 'nullable|integer|min:1|max:5',
+            'phone' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:150',
         ]);
 
         $accommodation = Accommodation::create($request->all());
@@ -61,6 +64,9 @@ class AccommodationController extends Controller
             'room_type' => 'sometimes|string|max:50',
             'capacity' => 'sometimes|integer|min:1',
             'notes' => 'nullable|string',
+            'start' => 'nullable|integer|min:1|max:5',
+            'phone' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:150',
         ]);
 
         $accommodation->update($request->all());

@@ -22,6 +22,9 @@ class Accommodation extends Model
         'room_type',
         'capacity',
         'notes',
+        'start',
+        'phone',
+        'email',
     ];
 
     /*

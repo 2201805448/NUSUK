@@ -32,7 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Display Notifications (User)
     Route::get('/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
-    Route::put('/notifications/read-all', [\App\Http\Controllers\Api\NotificationController::class, 'markAllAsRead']);
+
     Route::put('/notifications/{id}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
 
     // Advertisements / Announcements

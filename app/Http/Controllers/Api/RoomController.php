@@ -43,6 +43,7 @@ class RoomController extends Controller
             ],
             'floor' => 'nullable|integer',
             'room_type' => 'nullable|string|max:50',
+            'capacity' => 'nullable|integer|min:1',
             'status' => 'in:AVAILABLE,OCCUPIED,MAINTENANCE,CLEANING',
             'notes' => 'nullable|string',
         ]);
