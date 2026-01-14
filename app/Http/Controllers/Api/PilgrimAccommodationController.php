@@ -78,6 +78,9 @@ class PilgrimAccommodationController extends Controller
                     'room_type' => $assignment->accommodation->room_type,
                     'capacity' => $assignment->accommodation->capacity,
                     'notes' => $assignment->accommodation->notes,
+                    'stars' => $assignment->accommodation->start,
+                    'phone' => $assignment->accommodation->phone,
+                    'email' => $assignment->accommodation->email,
                 ] : null,
                 'room' => $assignment->room ? [
                     'room_id' => $assignment->room->id,
@@ -156,6 +159,9 @@ class PilgrimAccommodationController extends Controller
                 'room_type' => $hotel->room_type,
                 'capacity' => $hotel->capacity,
                 'notes' => $hotel->notes,
+                'stars' => $hotel->start,
+                'phone' => $hotel->phone,
+                'email' => $hotel->email,
                 'your_assignment' => $assignment ? [
                     'assignment_id' => $assignment->assignment_id,
                     'status' => $assignment->status,
@@ -228,7 +234,11 @@ class PilgrimAccommodationController extends Controller
                     'hotel_name' => $currentAssignment->accommodation->hotel_name,
                     'city' => $currentAssignment->accommodation->city,
                     'room_type' => $currentAssignment->accommodation->room_type,
+                    'capacity' => $currentAssignment->accommodation->capacity,
                     'notes' => $currentAssignment->accommodation->notes,
+                    'stars' => $currentAssignment->accommodation->start,
+                    'phone' => $currentAssignment->accommodation->phone,
+                    'email' => $currentAssignment->accommodation->email,
                 ] : null,
                 'room' => $currentAssignment->room ? [
                     'room_number' => $currentAssignment->room->room_number,
@@ -305,6 +315,11 @@ class PilgrimAccommodationController extends Controller
                     'hotel_name' => $assignment->accommodation->hotel_name ?? null,
                     'city' => $assignment->accommodation->city ?? null,
                     'address' => $assignment->accommodation->notes ?? null,
+                    'room_type' => $assignment->accommodation->room_type ?? null,
+                    'capacity' => $assignment->accommodation->capacity ?? null,
+                    'stars' => $assignment->accommodation->start ?? null,
+                    'phone' => $assignment->accommodation->phone ?? null,
+                    'email' => $assignment->accommodation->email ?? null,
                 ],
                 'room' => [
                     'room_number' => $assignment->room->room_number ?? null,
