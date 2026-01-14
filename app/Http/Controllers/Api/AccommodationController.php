@@ -10,7 +10,7 @@ use Illuminate\Validation\Rule;
 class AccommodationController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * عرض قائمة الفنادق
      */
     public function index()
     {
@@ -19,11 +19,11 @@ class AccommodationController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * إضافة فندق جديد (تم التعديل لضمان حفظ النجوم والهاتف والإيميل)
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'hotel_name' => 'required|string|max:150',
             'city' => 'required|string|max:100',
             'room_type' => 'required|string|max:50',
@@ -34,7 +34,17 @@ class AccommodationController extends Controller
             'email' => 'nullable|email|max:150',
         ]);
 
-        $accommodation = Accommodation::create($request->all());
+        // الحفظ اليدوي المباشر لحل مشكلة الـ Null
+        $accommodation = new Accommodation();
+        $accommodation->hotel_name = $validated['hotel_name'];
+        $accommodation->city = $validated['city'];
+        $accommodation->room_type = $validated['room_type'];
+        $accommodation->capacity = $validated['capacity'];
+        $accommodation->notes = $validated['notes'] ?? null;
+        $accommodation->start = $validated['start'] ?? null;
+        $accommodation->phone = $validated['phone'] ?? null;
+        $accommodation->email = $validated['email'] ?? null;
+        $accommodation->save();
 
         return response()->json([
             'message' => 'Accommodation created successfully',
@@ -43,7 +53,7 @@ class AccommodationController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * عرض بيانات فندق معين
      */
     public function show($id)
     {
@@ -52,13 +62,13 @@ class AccommodationController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * تحديث بيانات الفندق
      */
     public function update(Request $request, $id)
     {
         $accommodation = Accommodation::findOrFail($id);
 
-        $request->validate([
+        $validated = $request->validate([
             'hotel_name' => 'sometimes|string|max:150',
             'city' => 'sometimes|string|max:100',
             'room_type' => 'sometimes|string|max:50',
@@ -69,7 +79,8 @@ class AccommodationController extends Controller
             'email' => 'nullable|email|max:150',
         ]);
 
-        $accommodation->update($request->all());
+        // استخدام المصفوفة المفلترة لضمان الحفظ الصحيح
+        $accommodation->update($validated);
 
         return response()->json([
             'message' => 'Accommodation updated successfully',
@@ -78,15 +89,11 @@ class AccommodationController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * حذف الفندق
      */
     public function destroy($id)
     {
         $accommodation = Accommodation::findOrFail($id);
-
-        // Optional: Check if used in any room assignments or trips before deleting?
-        // simple delete for now, DB constraints should handle restrict/cascade
-
         $accommodation->delete();
 
         return response()->json([
@@ -95,27 +102,18 @@ class AccommodationController extends Controller
     }
 
     /**
-     * Get Housing Data for a specific Trip.
-     * Monitoring room distribution and number of individuals.
+     * جلب بيانات التسكين لرحلة معينة (للمشرفين والمسؤولين)
      */
     public function getHousingData(Request $request, $trip_id)
     {
         $trip = \App\Models\Trip::findOrFail($trip_id);
 
-        // Security check: Admin or Supervisor
-        // If Supervisor, ideally valid for their trip. But currently we don't have explicit Trip-Supervisor (only Group-Supervisor).
-        // Assuming Supervisor can view any trip they are involved in or just any trip if role is supervisor.
-        // For simplicity: Admin or Supervisor allowed.
         if (!auth()->user() || !in_array(auth()->user()->role, ['ADMIN', 'SUPERVISOR'])) {
             return response()->json(['message' => 'Unauthorized access.'], 403);
         }
 
-        // Load Accommodations -> Rooms -> RoomAssignments -> Pilgrim
-        // Note: RoomAssignments link Pilgrim to Accommodation AND Room (now).
-
         $hotels = $trip->accommodations()->with([
             'rooms.roomAssignments' => function ($q) {
-                // Filter active/confirmed assignments if needed?
                 $q->whereIn('status', ['CONFIRMED', 'PENDING']);
             },
             'rooms.roomAssignments.pilgrim.user'
