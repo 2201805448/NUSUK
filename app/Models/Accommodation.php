@@ -12,8 +12,8 @@ class Accommodation extends Model
     // اسم الـ Primary Key
     protected $primaryKey = 'accommodation_id';
 
-    // لأن الجدول ما فيهش created_at / updated_at
-    public $timestamps = false;
+    // Enable timestamps since the migration creates them
+    public $timestamps = true;
 
     // الحقول المسموح بها في create()
     protected $fillable = [
