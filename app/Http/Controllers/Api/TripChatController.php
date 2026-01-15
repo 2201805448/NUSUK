@@ -48,7 +48,7 @@ class TripChatController extends Controller
         $message = TripMessage::create([
             'trip_id' => $trip->trip_id,
             'user_id' => Auth::id(),
-            'content' => $request->content,
+            'content' => $request->input('content'),
         ]);
 
         // Re-load sender for response
@@ -68,15 +68,20 @@ class TripChatController extends Controller
     private function isAuthorized(Trip $trip)
     {
         $user = Auth::user();
+        if (!$user)
+            return false;
 
-        if ($user->role === 'ADMIN') {
+        // استخدام getAttribute يحل مشكلة الـ Protected Visibility
+        $userRole = $user->getAttribute('role');
+        $userId = $user->getAttribute('user_id');
+
+        if ($userRole === 'ADMIN') {
             return true;
         }
 
-        if ($user->role === 'SUPERVISOR') {
-            // Check if supervisor owns any group in this trip
-            return GroupTrip::where('trip_id', $trip->trip_id)
-                ->where('supervisor_id', $user->user_id)
+        if ($userRole === 'SUPERVISOR') {
+            return GroupTrip::where('trip_id', $trip->accommodation_id) // أو id حسب قاعدة بياناتك
+                ->where('supervisor_id', $userId)
                 ->exists();
         }
 

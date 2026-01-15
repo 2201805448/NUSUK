@@ -88,11 +88,9 @@ class TripController extends Controller
     {
         $trip = Trip::findOrFail($id);
 
+        // التحقق من البيانات: إما ID موجود أو بيانات الفندق الجديد
         $request->validate([
-            // If linking existing
             'accommodation_id' => 'nullable|exists:accommodations,accommodation_id',
-
-            // If creating new
             'hotel_name' => 'required_without:accommodation_id|string|max:150',
             'city' => 'required_without:accommodation_id|string|max:100',
             'room_type' => 'required_without:accommodation_id|string|max:50',
@@ -103,10 +101,11 @@ class TripController extends Controller
         $accommodation = null;
 
         DB::transaction(function () use ($request, $trip, &$accommodation) {
-            if ($request->has('accommodation_id') && $request->accommodation_id) {
+            if ($request->filled('accommodation_id')) {
+                // حالة الربط: الفندق موجود مسبقاً
                 $accommodation = Accommodation::findOrFail($request->accommodation_id);
             } else {
-                // Create new accommodation
+                // حالة الإنشاء: إنشاء فندق جديد تماماً كما كان سابقاً
                 $accommodation = Accommodation::create($request->only([
                     'hotel_name',
                     'city',
@@ -116,31 +115,16 @@ class TripController extends Controller
                 ]));
             }
 
-            // Sync without detaching existing (attach)
-            // check if already attached
+            // منع التكرار: التأكد أن الفندق ليس مرتبطاً بالرحلة مسبقاً
             if (!$trip->accommodations()->where('trip_accommodations.accommodation_id', $accommodation->accommodation_id)->exists()) {
                 $trip->accommodations()->attach($accommodation->accommodation_id);
             }
         });
 
         return response()->json([
-            'message' => 'Hotel added to trip successfully',
+            'message' => 'Hotel processed successfully',
             'trip' => $trip->load('accommodations'),
             'accommodation' => $accommodation
-        ]);
-    }
-
-    /**
-     * Remove hotel from trip
-     */
-    public function removeHotel($trip_id, $accommodation_id)
-    {
-        $trip = Trip::findOrFail($trip_id);
-        $trip->accommodations()->detach($accommodation_id);
-
-        return response()->json([
-            'message' => 'Hotel removed from trip successfully',
-            'trip' => $trip->load('accommodations')
         ]);
     }
 
@@ -219,11 +203,10 @@ class TripController extends Controller
         $reviews = [];
 
         foreach ($trip->accommodations as $hotel) {
-            // Find evaluations for this hotel (target_id) where type='HOTEL' and internal_only=0
             $hotelReviews = \App\Models\Evaluation::where('type', 'HOTEL')
                 ->where('target_id', $hotel->accommodation_id)
                 ->where('internal_only', 0)
-                ->select('score', 'concern_text', 'created_at') // Select only non-identifying fields
+                ->select('score', 'concern_text', 'created_at')
                 ->orderBy('created_at', 'desc')
                 ->get();
 

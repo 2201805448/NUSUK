@@ -36,12 +36,14 @@ class ReportController extends Controller
 
         $trips = $query->get();
 
-        if ($request->format === 'pdf') {
+        $format = $request->input('format');
+
+        if ($format === 'pdf') {
             $pdf = Pdf::loadView('reports.trips_pdf', ['trips' => $trips]);
             return $pdf->download('trips_report.pdf');
-        } elseif ($request->format === 'excel') {
+        } elseif ($format === 'excel') {
             return Excel::download(new TripsExport($trips), 'trips_report.xlsx');
-        } elseif ($request->format === 'csv') {
+        } elseif ($format === 'csv') {
             $csvFileName = 'trips_report.csv';
             $headers = [
                 "Content-type" => "text/csv",
@@ -57,7 +59,7 @@ class ReportController extends Controller
 
                 foreach ($trips as $trip) {
                     fputcsv($file, [
-                        $trip->trip_id,
+                        $trip->getKey(), // يفضل استخدام هذه الطريقة لجلب المعرف الأساسي مهما كان اسمه
                         $trip->trip_name,
                         $trip->status,
                         $trip->start_date,
@@ -69,7 +71,7 @@ class ReportController extends Controller
                 fclose($file);
             };
 
-            return \Illuminate\Support\Facades\Response::stream($callback, 200, $headers);
+            return Response::stream($callback, 200, $headers);
         }
     }
 }

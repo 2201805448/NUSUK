@@ -19,7 +19,10 @@ class SupportTicketController extends Controller
     {
         $user = Auth::user();
 
-        $tickets = Ticket::where('user_id', $user->user_id)
+        // استخدام getAttribute لضمان الوصول للمعرف حتى لو كان protected
+        $userId = $user->getAttribute('user_id');
+
+        $tickets = Ticket::where('user_id', $userId)
             ->with('logs')
             ->orderBy('created_at', 'desc')
             ->get();
@@ -95,7 +98,7 @@ class SupportTicketController extends Controller
         $log = TicketLog::create([
             'ticket_id' => $ticket->ticket_id,
             'action_by' => Auth::id(),
-            'action_note' => $request->content,
+            'action_note' => $request->input('content'),
         ]);
 
         // Notify User if reply is from someone else

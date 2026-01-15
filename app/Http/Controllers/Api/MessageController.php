@@ -24,7 +24,7 @@ class MessageController extends Controller
         $message = Message::create([
             'sender_id' => Auth::id(),
             'receiver_id' => $request->receiver_id,
-            'content' => $request->content,
+            'content' => $request->context,
             'created_at' => now(),
         ]);
 
@@ -56,8 +56,9 @@ class MessageController extends Controller
 
             return [
                 'user_id' => $otherUserId,
-                'user_name' => $otherUser ? $otherUser->full_name : 'Unknown',
-                'user_role' => $otherUser ? $otherUser->role : 'Unknown',
+                // استخدام getAttribute يحل مشكلة الأخطاء الحمراء في الصور
+                'user_name' => $otherUser ? $otherUser->getAttribute('full_name') : 'Unknown',
+                'user_role' => $otherUser ? $otherUser->getAttribute('role') : 'Unknown',
                 'last_message' => $msg->content,
                 'timestamp' => $msg->created_at,
             ];
