@@ -3,8 +3,9 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,11 +16,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // إضافة مستخدم الأدمن (دعاء) مع مطابقة حقول قاعدة البيانات الخاصة بكِ
+        User::updateOrCreate(
+            ['email' => 'doaa@gmail.com'], // للبحث إذا كان المستخدم موجود مسبقاً
+            [
+                'full_name'      => 'Doaa',
+                'phone_number'   => '0924576189', 
+                'password'       => Hash::make('0924576189'), 
+                'role'           => 'admin', 
+                'account_status' => 'active', // لضمان عدم ظهور خطأ الحقل الفارغ
+            ]
+        );
     }
 }

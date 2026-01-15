@@ -56,10 +56,18 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->firstOrFail();
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        // Determine redirect URL based on role
+        $redirectUrl = '/dashboard'; // Default redirect
+        if (strtoupper($user->role) === 'ADMIN') {
+            $redirectUrl = '/admin/dashboard';
+        }
+
         return response()->json([
             'message' => 'Login successful',
             'user' => $user,
+            'role' => $user->role,
             'token' => $token,
+            'redirect_url' => $redirectUrl,
         ]);
     }
 
