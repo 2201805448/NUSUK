@@ -21,23 +21,22 @@ class TripController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'package_id' => 'required|exists:packages,package_id',
+            // اجعلها nullable لكي لا يرفض السيرفر إنشاء رحلة بدون باقة
+            'package_id' => 'nullable|exists:packages,package_id',
             'trip_name' => 'required|string|max:150',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'status' => 'in:PLANNED,ONGOING,COMPLETED,CANCELLED',
             'capacity' => 'nullable|integer|min:1',
-            'notes' => 'nullable|string',
         ]);
 
         $trip = Trip::create($request->all());
 
         return response()->json([
-            'message' => 'Trip created successfully',
+            'message' => 'تم إنشاء الرحلة العامة بنجاح',
             'trip' => $trip
         ], 201);
     }
-
     // Get specific trip with its hotels
     public function show($id)
     {
@@ -51,7 +50,7 @@ class TripController extends Controller
         $trip = Trip::findOrFail($id);
 
         $request->validate([
-            'package_id' => 'sometimes|exists:packages,package_id',
+            'package_id' => 'nullable|exists:packages,package_id',
             'trip_name' => 'sometimes|string|max:150',
             'start_date' => 'sometimes|date',
             'end_date' => 'sometimes|date|after_or_equal:start_date',
@@ -88,43 +87,23 @@ class TripController extends Controller
     {
         $trip = Trip::findOrFail($id);
 
-        // التحقق من البيانات: إما ID موجود أو بيانات الفندق الجديد
+        // التحقق: نطلب فقط معرف الفندق ويجب أن يكون موجوداً مسبقاً
         $request->validate([
-            'accommodation_id' => 'nullable|exists:accommodations,accommodation_id',
-            'hotel_name' => 'required_without:accommodation_id|string|max:150',
-            'city' => 'required_without:accommodation_id|string|max:100',
-            'room_type' => 'required_without:accommodation_id|string|max:50',
-            'capacity' => 'required_without:accommodation_id|integer|min:1',
-            'notes' => 'nullable|string',
+            'accommodation_id' => 'required|exists:accommodations,accommodation_id',
         ]);
 
-        $accommodation = null;
-
-        DB::transaction(function () use ($request, $trip, &$accommodation) {
-            if ($request->filled('accommodation_id')) {
-                // حالة الربط: الفندق موجود مسبقاً
-                $accommodation = Accommodation::findOrFail($request->accommodation_id);
-            } else {
-                // حالة الإنشاء: إنشاء فندق جديد تماماً كما كان سابقاً
-                $accommodation = Accommodation::create($request->only([
-                    'hotel_name',
-                    'city',
-                    'room_type',
-                    'capacity',
-                    'notes'
-                ]));
-            }
-
-            // منع التكرار: التأكد أن الفندق ليس مرتبطاً بالرحلة مسبقاً
-            if (!$trip->accommodations()->where('trip_accommodations.accommodation_id', $accommodation->accommodation_id)->exists()) {
-                $trip->accommodations()->attach($accommodation->accommodation_id);
-            }
-        });
+        // تنفيذ عملية الربط مع التأكد من عدم التكرار
+        if (!$trip->accommodations()->where('trip_accommodations.accommodation_id', $request->accommodation_id)->exists()) {
+            $trip->accommodations()->attach($request->accommodation_id);
+        } else {
+            return response()->json([
+                'message' => 'This hotel is already linked to the trip.'
+            ], 422);
+        }
 
         return response()->json([
-            'message' => 'Hotel processed successfully',
-            'trip' => $trip->load('accommodations'),
-            'accommodation' => $accommodation
+            'message' => 'Hotel linked to trip successfully',
+            'trip' => $trip->load('accommodations')
         ]);
     }
 
