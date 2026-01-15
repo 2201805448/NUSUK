@@ -40,7 +40,42 @@ protected $fillable = [
 
 ---
 
-### 3. RoomController Update
+### 3. Price Field Addition (2026-01-15)
+
+**Migration:** `database/migrations/2026_01_15_110000_add_price_to_rooms_table.php`
+
+Added a new `price` column to the `rooms` table:
+
+```php
+$table->decimal('price', 10, 2)->nullable()->after('capacity');
+```
+
+This field stores the room price as a decimal value with 2 decimal places.
+
+**Model Update:** Added `price` to the `$fillable` array:
+
+```php
+protected $fillable = [
+    'accommodation_id',
+    'room_number',
+    'floor',
+    'room_type',
+    'capacity',
+    'price',    // NEW
+    'status',
+    'notes',
+];
+```
+
+**Controller Update:** Added validation for `price` in both `store` and `update` functions:
+
+```php
+'price' => 'nullable|numeric|min:0',
+```
+
+---
+
+### 4. RoomController Update
 
 **File:** `app/Http/Controllers/Api/RoomController.php`
 
@@ -128,6 +163,7 @@ Content-Type: application/json
     "floor": 1,
     "room_type": "Double",
     "capacity": 2,
+    "price": 150.00,
     "status": "AVAILABLE"
 }
 ```
