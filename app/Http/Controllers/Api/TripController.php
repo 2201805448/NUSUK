@@ -13,7 +13,7 @@ class TripController extends Controller
     // List all trips
     public function index()
     {
-        $trips = Trip::with('package')->get();
+        $trips = Trip::with(['accommodations', 'transports', 'activities'])->get();
         return response()->json($trips);
     }
 
@@ -21,8 +21,6 @@ class TripController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            // اجعلها nullable لكي لا يرفض السيرفر إنشاء رحلة بدون باقة
-            'package_id' => 'nullable|exists:packages,package_id',
             'trip_name' => 'required|string|max:150',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
@@ -40,7 +38,7 @@ class TripController extends Controller
     // Get specific trip with its hotels
     public function show($id)
     {
-        $trip = Trip::with(['package', 'accommodations', 'transports', 'activities'])->findOrFail($id);
+        $trip = Trip::with(['accommodations', 'transports', 'activities'])->findOrFail($id);
         return response()->json($trip);
     }
 
@@ -50,7 +48,6 @@ class TripController extends Controller
         $trip = Trip::findOrFail($id);
 
         $request->validate([
-            'package_id' => 'nullable|exists:packages,package_id',
             'trip_name' => 'sometimes|string|max:150',
             'start_date' => 'sometimes|date',
             'end_date' => 'sometimes|date|after_or_equal:start_date',

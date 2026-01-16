@@ -9,7 +9,6 @@ class Trip extends Model
     protected $primaryKey = 'trip_id';
 
     protected $fillable = [
-        'package_id',
         'trip_name',
         'start_date',
         'end_date',
@@ -20,11 +19,7 @@ class Trip extends Model
 
     public $timestamps = false;
 
-    // 🔗 العلاقة مع Package
-    public function package()
-    {
-        return $this->belongsTo(Package::class, 'package_id', 'package_id');
-    }
+
 
     // 🔗 العلاقة مع Bookings
     public function bookings()
