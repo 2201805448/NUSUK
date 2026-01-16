@@ -26,6 +26,9 @@ class TripController extends Controller
             'end_date' => 'required|date|after_or_equal:start_date',
             'status' => 'in:PLANNED,ONGOING,COMPLETED,CANCELLED',
             'capacity' => 'nullable|integer|min:1',
+            'flight_number' => 'nullable|string|max:50',
+            'airline' => 'nullable|string|max:100',
+            'route' => 'nullable|string|max:200',
         ]);
 
         $trip = Trip::create($request->all());
@@ -54,6 +57,9 @@ class TripController extends Controller
             'status' => 'in:PLANNED,ONGOING,COMPLETED,CANCELLED',
             'capacity' => 'nullable|integer|min:1',
             'notes' => 'nullable|string',
+            'flight_number' => 'nullable|string|max:50',
+            'airline' => 'nullable|string|max:100',
+            'route' => 'nullable|string|max:200',
         ]);
 
         $trip->update($request->all());

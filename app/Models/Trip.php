@@ -15,6 +15,9 @@ class Trip extends Model
         'status',
         'capacity',
         'notes',
+        'flight_number',
+        'airline',
+        'route',
     ];
 
     public $timestamps = false;

@@ -29,6 +29,10 @@ return new class extends Migration {
             $table->integer('capacity')->nullable();
 
             $table->text('notes')->nullable();
+
+            $table->string('flight_number')->nullable();
+            $table->string('airline')->nullable();
+            $table->string('route')->nullable();
         });
     }
 
