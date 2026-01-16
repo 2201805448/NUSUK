@@ -120,7 +120,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Trip Documents (Upload)
         Route::post('/trips/{trip_id}/documents', [\App\Http\Controllers\Api\TripDocumentController::class, 'store']);
         Route::delete('/trips/{trip_id}/documents/{document_id}', [\App\Http\Controllers\Api\TripDocumentController::class, 'destroy']);
-
+Route::post('/trip-accommodations', [\App\Http\Controllers\Api\TripController::class, 'addHotel']);
         // Trip Chat
         Route::get('/trips/{id}/chat', [\App\Http\Controllers\Api\TripChatController::class, 'index']);
         Route::post('/trips/{id}/chat', [\App\Http\Controllers\Api\TripChatController::class, 'store']);

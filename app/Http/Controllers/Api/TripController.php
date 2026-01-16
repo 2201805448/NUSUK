@@ -86,29 +86,25 @@ class TripController extends Controller
      * Add hotel data to a trip.
      * Can link an existing hotel (by accommodation_id) OR create a new one.
      */
-    public function addHotel(Request $request, $id)
-    {
-        $trip = Trip::findOrFail($id);
+    public function addHotel(Request $request) // احذفي متغير $id من هنا
+{
+    // استلام الـ ID من البيانات المرسلة
+    $tripId = $request->trip_id; 
+    $trip = Trip::findOrFail($tripId);
 
-        // التحقق: نطلب فقط معرف الفندق ويجب أن يكون موجوداً مسبقاً
-        $request->validate([
-            'accommodation_id' => 'required|exists:accommodations,accommodation_id',
-        ]);
+    $request->validate([
+        'accommodation_id' => 'required|exists:accommodations,accommodation_id',
+    ]);
 
-        // تنفيذ عملية الربط مع التأكد من عدم التكرار
-        if (!$trip->accommodations()->where('trip_accommodations.accommodation_id', $request->accommodation_id)->exists()) {
-            $trip->accommodations()->attach($request->accommodation_id);
-        } else {
-            return response()->json([
-                'message' => 'This hotel is already linked to the trip.'
-            ], 422);
-        }
-
-        return response()->json([
-            'message' => 'Hotel linked to trip successfully',
-            'trip' => $trip->load('accommodations')
-        ]);
+    if (!$trip->accommodations()->where('trip_accommodations.accommodation_id', $request->accommodation_id)->exists()) {
+        $trip->accommodations()->attach($request->accommodation_id);
     }
+
+    return response()->json([
+        'message' => 'تم ربط الفندق بنجاح',
+        'trip' => $trip->load('accommodations')
+    ]);
+}
 
     /**
      * Add activity (visit) to a trip
