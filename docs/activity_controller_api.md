@@ -59,7 +59,10 @@ Creates a new activity record in the database.
 | `activity_date` | required, date | Date of the activity |
 | `activity_time` | required | Start time (HH:mm format) |
 | `end_time` | nullable | Optional end time |
-| `status` | in:SCHEDULED,IN_PROGRESS,DONE,CANCELLED | Activity status |
+| `status` | nullable, string | Activity status (flexible, accepts any string or empty) |
+
+> [!NOTE]
+> The `status` validation was updated from a strict enum (`in:SCHEDULED,IN_PROGRESS,DONE,CANCELLED`) to a flexible `nullable|string` rule to accommodate various status values from the frontend.
 
 **Request Example:**
 ```json

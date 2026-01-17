@@ -26,9 +26,10 @@ class ActivityController extends Controller
             'activity_type' => 'required|string|max:100',
             'location' => 'required|string|max:150',
             'activity_date' => 'required|date',
-            'activity_time' => 'required', // HH:mm format
+            'activity_time' => 'required',
             'end_time' => 'nullable',
-            'status' => 'in:SCHEDULED,IN_PROGRESS,DONE,CANCELLED',
+            // عدلت الـ status هنا ليكون مرن ويقبل أي نص أو يكون فارغ
+            'status' => 'nullable|string',
         ]);
 
         $activity = Activity::create($validated);
