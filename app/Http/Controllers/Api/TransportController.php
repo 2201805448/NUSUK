@@ -30,7 +30,7 @@ class TransportController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'trip_id' => 'required|exists:trips,trip_id',
+            'trip_id' => 'nullable|exists:trips,trip_id',
             'driver_id' => 'nullable|exists:drivers,driver_id',
             'route_id' => 'nullable|exists:transport_routes,id', // Added
             'transport_type' => 'required|string|max:50',

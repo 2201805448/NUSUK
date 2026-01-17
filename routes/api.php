@@ -120,7 +120,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Trip Documents (Upload)
         Route::post('/trips/{trip_id}/documents', [\App\Http\Controllers\Api\TripDocumentController::class, 'store']);
         Route::delete('/trips/{trip_id}/documents/{document_id}', [\App\Http\Controllers\Api\TripDocumentController::class, 'destroy']);
-Route::post('/trip-accommodations', [\App\Http\Controllers\Api\TripController::class, 'addHotel']);
+        Route::post('/trip-accommodations', [\App\Http\Controllers\Api\TripController::class, 'addHotel']);
         // Trip Chat
         Route::get('/trips/{id}/chat', [\App\Http\Controllers\Api\TripChatController::class, 'index']);
         Route::post('/trips/{id}/chat', [\App\Http\Controllers\Api\TripChatController::class, 'store']);
@@ -155,7 +155,7 @@ Route::post('/trip-accommodations', [\App\Http\Controllers\Api\TripController::c
         Route::put('/room-assignments/{id}', [\App\Http\Controllers\Api\RoomAssignmentController::class, 'update']);
 
         // Activity Management (Shared)
-        Route::apiResource('activities', \App\Http\Controllers\Api\ActivityController::class)->except(['store']); // Store is under trips/{id}/activities
+        Route::apiResource('activities', \App\Http\Controllers\Api\ActivityController::class);
 
         // Pilgrim Notes
         Route::post('/pilgrims/{id}/notes', [\App\Http\Controllers\Api\SupervisorNoteController::class, 'store']);
