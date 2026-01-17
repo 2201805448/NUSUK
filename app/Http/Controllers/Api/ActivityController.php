@@ -9,6 +9,37 @@ use App\Models\Activity;
 class ActivityController extends Controller
 {
     /**
+     * عرض كل الأنشطة (اختياري)
+     */
+    public function index()
+    {
+        return response()->json(Activity::all());
+    }
+
+    /**
+     * حفظ نشاط جديد (هادي هي الدالة اللي كانت ناقصة)
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'trip_id' => 'required|exists:trips,trip_id',
+            'activity_type' => 'required|string|max:100',
+            'location' => 'required|string|max:150',
+            'activity_date' => 'required|date',
+            'activity_time' => 'required', // HH:mm format
+            'end_time' => 'nullable',
+            'status' => 'in:SCHEDULED,IN_PROGRESS,DONE,CANCELLED',
+        ]);
+
+        $activity = Activity::create($validated);
+
+        return response()->json([
+            'message' => 'Activity created successfully',
+            'activity' => $activity
+        ], 201);
+    }
+
+    /**
      * Display the specified activity.
      */
     public function show($id)
@@ -28,7 +59,7 @@ class ActivityController extends Controller
             'activity_type' => 'sometimes|string|max:100',
             'location' => 'sometimes|string|max:150',
             'activity_date' => 'sometimes|date',
-            'activity_time' => 'sometimes|date_format:H:i',
+            'activity_time' => 'sometimes',
             'status' => 'in:SCHEDULED,IN_PROGRESS,DONE,CANCELLED',
         ]);
 
