@@ -130,6 +130,13 @@ class BookingController extends Controller
     // Execute a booking (Create)
     public function store(Request $request)
     {
+        // Only pilgrims can create bookings
+        if (Auth::user()->role !== 'pilgrim') {
+            return response()->json([
+                'message' => 'Access denied. Booking is strictly reserved for Pilgrim accounts.'
+            ], 403);
+        }
+
         $request->validate([
             'trip_id' => 'required|exists:trips,trip_id',
             'pay_method' => 'nullable|string|max:50',
