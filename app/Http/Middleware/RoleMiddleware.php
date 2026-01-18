@@ -22,7 +22,7 @@ class RoleMiddleware
 
         $user = Auth::user();
 
-        if (!in_array($user->role, $roles)) {
+        if (!in_array(strtolower($user->role), array_map('strtolower', $roles))) {
             return response()->json(['message' => 'Unauthorized. Access denied.'], 403);
         }
 

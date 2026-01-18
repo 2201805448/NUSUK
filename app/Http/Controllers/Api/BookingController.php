@@ -130,8 +130,11 @@ class BookingController extends Controller
     // Execute a booking (Create)
     public function store(Request $request)
     {
+        $user = Auth::user();
+        \Illuminate\Support\Facades\Log::info("Booking Attempt: User ID {$user->user_id}, Role: {$user->role}");
+
         // Only pilgrims can create bookings
-        if (Auth::user()->role !== 'pilgrim') {
+        if (Str::lower($user->role) !== 'pilgrim') {
             return response()->json([
                 'message' => 'Access denied. Booking is strictly reserved for Pilgrim accounts.'
             ], 403);
