@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
 
+use Illuminate\Support\Str;
+
 class RoleMiddleware
 {
     /**
@@ -22,7 +24,10 @@ class RoleMiddleware
 
         $user = Auth::user();
 
-        if (!in_array(strtolower($user->role), array_map('strtolower', $roles))) {
+        $userRole = Str::lower(trim($user->role));
+        $allowedRoles = array_map(fn($r) => Str::lower(trim($r)), $roles);
+
+        if (!in_array($userRole, $allowedRoles)) {
             return response()->json(['message' => 'Unauthorized. Access denied.'], 403);
         }
 

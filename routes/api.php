@@ -62,6 +62,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/packages/{id}/reviews', [\App\Http\Controllers\Api\PackageController::class, 'getTripReviews']);
     Route::get('/trips/{id}/hotel-reviews', [\App\Http\Controllers\Api\TripController::class, 'getHotelReviews']);
 
+    // Accommodations & Rooms (Read Access for all authenticated users)
+    Route::get('/accommodations', [\App\Http\Controllers\Api\AccommodationController::class, 'index']);
+    Route::get('/accommodations/{id}', [\App\Http\Controllers\Api\AccommodationController::class, 'show']);
+    Route::get('/rooms', [\App\Http\Controllers\Api\RoomController::class, 'index']);
+    Route::get('/rooms/{id}', [\App\Http\Controllers\Api\RoomController::class, 'show']);
+
     // Bookings
     Route::get('/bookings', [\App\Http\Controllers\Api\BookingController::class, 'index']);
     Route::get('/bookings/{id}', [\App\Http\Controllers\Api\BookingController::class, 'show']);
@@ -201,8 +207,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/packages/{id}', [\App\Http\Controllers\Api\PackageController::class, 'destroy']);
 
         // Accommodation Management
-        Route::apiResource('accommodations', \App\Http\Controllers\Api\AccommodationController::class);
-        Route::apiResource('rooms', \App\Http\Controllers\Api\RoomController::class);
+        Route::apiResource('accommodations', \App\Http\Controllers\Api\AccommodationController::class)->except(['index', 'show']);
+        Route::apiResource('rooms', \App\Http\Controllers\Api\RoomController::class)->except(['index', 'show']);
 
         // Transportation Management
         Route::apiResource('transports', \App\Http\Controllers\Api\TransportController::class);
