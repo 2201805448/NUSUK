@@ -38,7 +38,7 @@ class PackageController extends Controller
             'accommodation_id' => 'required|exists:accommodations,accommodation_id',
             'room_type' => 'required|string',
             'description' => 'nullable|string',
-            'services' => 'nullable|string',
+            'services' => 'nullable|array',
             'mod_policy' => 'nullable|string',
             'cancel_policy' => 'nullable|string',
             'is_active' => 'boolean'
@@ -75,7 +75,7 @@ class PackageController extends Controller
             'accommodation_id' => 'sometimes|exists:accommodations,accommodation_id',
             'room_type' => 'sometimes|string',
             'description' => 'nullable|string',
-            'services' => 'nullable|array', // تأكدنا أنها مصفوفة
+            'services' => 'nullable|array',
             'mod_policy' => 'nullable|string',
             'cancel_policy' => 'nullable|string',
             'is_active' => 'sometimes|boolean'
