@@ -24,7 +24,7 @@ class PackageController extends Controller
     // Get specific package details
     public function show($id)
     {
-        $package = Package::findOrFail($id);
+        $package = Package::with('accommodation')->findOrFail($id);
         return response()->json($package);
     }
 
@@ -35,6 +35,8 @@ class PackageController extends Controller
             'package_name' => 'required|string|max:150',
             'price' => 'required|numeric|min:0',
             'duration_days' => 'required|integer|min:1',
+            'accommodation_id' => 'required|exists:accommodations,accommodation_id',
+            'room_type' => 'required|string',
             'description' => 'nullable|string',
             'services' => 'nullable|string',
             'mod_policy' => 'nullable|string',
@@ -46,6 +48,8 @@ class PackageController extends Controller
             'package_name' => $request->package_name,
             'price' => $request->price,
             'duration_days' => $request->duration_days,
+            'accommodation_id' => $request->accommodation_id,
+            'room_type' => $request->room_type,
             'description' => $request->description,
             'services' => $request->services,
             'mod_policy' => $request->mod_policy,
@@ -68,6 +72,8 @@ class PackageController extends Controller
             'package_name' => 'sometimes|string|max:150',
             'price' => 'sometimes|numeric|min:0',
             'duration_days' => 'sometimes|integer|min:1',
+            'accommodation_id' => 'sometimes|exists:accommodations,accommodation_id',
+            'room_type' => 'sometimes|string',
             'description' => 'nullable|string',
             'services' => 'nullable|string',
             'mod_policy' => 'nullable|string',

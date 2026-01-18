@@ -15,6 +15,8 @@ class Package extends Model
         'price',
         'description',
         'duration_days',
+        'accommodation_id',
+        'room_type',
         'services',
         'mod_policy',
         'cancel_policy',
@@ -29,5 +31,10 @@ class Package extends Model
     public function bookings()
     {
         return $this->hasMany(Booking::class, 'package_id', 'package_id');
+    }
+
+    public function accommodation()
+    {
+        return $this->belongsTo(Accommodation::class, 'accommodation_id', 'accommodation_id');
     }
 }
