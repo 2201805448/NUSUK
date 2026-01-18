@@ -22,6 +22,12 @@ class Package extends Model
         'cancel_policy',
         'is_active',
     ];
+    protected $casts = [
+        'services' => 'array',      // يحول النص المخزن في القاعدة لمصفوفة يقرأها الـ Vue
+        'is_active' => 'boolean',    // يضمن وصول حالة النشاط كقيمة صح/خطأ وليس 0 أو 1
+        'price' => 'decimal:2',      // يحافظ على دقة السعر عند الإرسال
+        'duration_days' => 'integer' // يضمن وصول المدة كرقم صحيح
+    ];
 
     public function trips()
     {

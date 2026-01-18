@@ -9,11 +9,11 @@ use App\Models\Package;
 class PackageController extends Controller
 {
     // List all packages
+    // 1. تحديث دالة الـ index لإرسال بيانات الفندق
     public function index(Request $request)
     {
-        $query = Package::query();
+        $query = Package::with('accommodation'); // إضافة الفندق للنتائج
 
-        // Optional: Filter by active status
         if ($request->has('is_active')) {
             $query->where('is_active', filter_var($request->is_active, FILTER_VALIDATE_BOOLEAN));
         }
@@ -63,11 +63,11 @@ class PackageController extends Controller
         ], 201);
     }
 
-    // Update an existing package
     public function update(Request $request, $id)
     {
         $package = Package::findOrFail($id);
 
+        // 1. التحقق من البيانات (Validation)
         $request->validate([
             'package_name' => 'sometimes|string|max:150',
             'price' => 'sometimes|numeric|min:0',
@@ -75,17 +75,40 @@ class PackageController extends Controller
             'accommodation_id' => 'sometimes|exists:accommodations,accommodation_id',
             'room_type' => 'sometimes|string',
             'description' => 'nullable|string',
-            'services' => 'nullable|string',
+            'services' => 'nullable|array', // تأكدنا أنها مصفوفة
             'mod_policy' => 'nullable|string',
             'cancel_policy' => 'nullable|string',
-            'is_active' => 'boolean'
+            'is_active' => 'sometimes|boolean'
         ]);
 
-        $package->update($request->all());
+        // 2. تجهيز البيانات للتحديث (Data Mapping)
+        $data = $request->only([
+            'package_name',
+            'price',
+            'duration_days',
+            'accommodation_id',
+            'room_type',
+            'description',
+            'mod_policy',
+            'cancel_policy'
+        ]);
+
+        // معالجة حقل الخدمات (Mapping services from features)
+        if ($request->has('services')) {
+            $data['services'] = $request->services;
+        }
+
+        // معالجة حالة النشاط (Mapping is_active from status/is_active)
+        if ($request->has('is_active')) {
+            $data['is_active'] = filter_var($request->is_active, FILTER_VALIDATE_BOOLEAN);
+        }
+
+        // 3. تنفيذ التحديث في قاعدة البيانات
+        $package->update($data);
 
         return response()->json([
-            'message' => 'Package updated successfully',
-            'package' => $package
+            'message' => 'تم تحديث الباقة بنجاح',
+            'package' => $package->load('accommodation') // تحميل بيانات الفندق الجديدة في الرد
         ]);
     }
 
