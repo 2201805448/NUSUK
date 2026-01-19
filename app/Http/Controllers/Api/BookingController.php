@@ -135,7 +135,7 @@ class BookingController extends Controller
 
         // Only pilgrims can create bookings
         // Only pilgrims can create bookings
-        if (Str::lower($request->user()->role) !== 'pilgrim') {
+        if (Str::lower(trim($request->user()->role)) !== 'pilgrim') {
             return response()->json(['message' => 'Access denied'], 403);
         }
 
