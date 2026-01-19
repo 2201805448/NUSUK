@@ -43,4 +43,20 @@ class User extends Authenticatable
     {
         return $this->hasOne(Pilgrim::class, 'user_id', 'user_id');
     }
+
+    /**
+     * Mutator to ensure role is always stored in Title Case.
+     */
+    public function setRoleAttribute($value)
+    {
+        $this->attributes['role'] = ucfirst(strtolower($value));
+    }
+
+    /**
+     * Accessor to ensure role is always returned in Title Case.
+     */
+    public function getRoleAttribute($value)
+    {
+        return ucfirst(strtolower($value));
+    }
 }
