@@ -48,4 +48,10 @@ class Trip extends Model
     {
         return $this->hasMany(Activity::class, 'trip_id', 'trip_id');
     }
+
+    // 🔗 العلاقة مع Package
+    public function package()
+    {
+        return $this->belongsTo(Package::class, 'package_id', 'package_id');
+    }
 }
