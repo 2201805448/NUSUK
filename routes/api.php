@@ -150,8 +150,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/groups/{id}/members', [\App\Http\Controllers\Api\GroupController::class, 'addMember']);
         Route::post('/groups/{id}/transfer', [\App\Http\Controllers\Api\GroupController::class, 'transferMember']);
         Route::post('/groups/{id}/remove', [\App\Http\Controllers\Api\GroupController::class, 'removeMember']);
-        Route::put('/groups/{id}/assign-supervisor', [\App\Http\Controllers\Api\GroupController::class, 'assignSupervisor']);
-        Route::put('/groups/{id}/assign-supervisor', [\App\Http\Controllers\Api\GroupController::class, 'assignSupervisor']);
+        Route::post('/groups/{group}/supervisor', [\App\Http\Controllers\Api\GroupController::class, 'assignSupervisor']);
         Route::put('/groups/{id}/unassign-supervisor', [\App\Http\Controllers\Api\GroupController::class, 'unassignSupervisor']);
 
         // Monitoring

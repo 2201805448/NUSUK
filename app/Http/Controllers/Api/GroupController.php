@@ -317,32 +317,19 @@ class GroupController extends Controller
         ]);
     }
 
-    // Assign Supervisor to Group (Admin Only)
-    public function assignSupervisor(Request $request, $id)
+    public function assignSupervisor(Request $request, GroupTrip $group)
     {
-        // Only Admin can assign/change supervisors
-        if (Auth::user()->role !== 'ADMIN') {
-            return response()->json(['message' => 'Unauthorized. Admin access required.'], 403);
-        }
-
-        $group = GroupTrip::findOrFail($id);
-
-        $request->validate([
-            'supervisor_id' => 'required|exists:users,user_id',
+        $validated = $request->validate([
+            'supervisor_id' => 'required|exists:users,user_id'
         ]);
 
-        $supervisor = \App\Models\User::findOrFail($request->supervisor_id);
-
-        if ($supervisor->role !== 'SUPERVISOR') {
-            return response()->json(['message' => 'Selected user is not a Supervisor.'], 400);
-        }
-
-        $group->supervisor_id = $supervisor->user_id;
-        $group->save();
+        $group->update([
+            'supervisor_id' => $validated['supervisor_id']
+        ]);
 
         return response()->json([
-            'message' => 'Supervisor assigned successfully.',
-            'group' => $group
+            'message' => 'Supervisor assigned successfully',
+            'group' => $group->load('supervisor')
         ]);
     }
 
