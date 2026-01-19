@@ -10,6 +10,7 @@ class Trip extends Model
 
     protected $fillable = [
         'trip_name',
+        'package_id',
         'start_date',
         'end_date',
         'status',

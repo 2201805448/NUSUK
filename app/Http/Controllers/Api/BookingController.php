@@ -142,11 +142,19 @@ class BookingController extends Controller
 
         $request->validate([
             'trip_id' => 'required|exists:trips,trip_id',
+            'package_id' => 'nullable|exists:packages,package_id', // Optional if trip has it, but good to validate if sent
             'pay_method' => 'nullable|string|max:50',
             'request_notes' => 'nullable|string',
         ]);
 
         $trip = Trip::with('package')->findOrFail($request->trip_id);
+
+        // Determine Package ID: Use Trip's package first, then Request's package
+        $packageId = $trip->package_id ?? $request->package_id;
+
+        if (!$packageId) {
+            return response()->json(['message' => 'Package ID is required. The selected trip is not linked to a package, so you must provide package_id.'], 422);
+        }
 
         // Ensure trip is bookable (e.g. not cancelled, start date in future?)
         // For now, just check if it's not CANCELLED
@@ -160,9 +168,17 @@ class BookingController extends Controller
         // Calculate Price (Default to Package Price for single person for now)
         $totalPrice = $trip->package ? $trip->package->price : 0;
 
+        // If price is 0 (maybe package not loaded via relation due to missing ID initially), try to fetch package if we have ID
+        if ($totalPrice == 0 && $packageId) {
+            $package = \App\Models\Package::find($packageId);
+            if ($package) {
+                $totalPrice = $package->price;
+            }
+        }
+
         $booking = Booking::create([
             'user_id' => Auth::id(),
-            'package_id' => $trip->package_id,
+            'package_id' => $packageId,
             'trip_id' => $trip->trip_id,
             'booking_ref' => $bookingRef,
             'booking_date' => now(),
