@@ -16,10 +16,10 @@ Route::post('/groups/{group}/supervisor', [\App\Http\Controllers\Api\GroupContro
 
 ### 2. Controller (`app/Http/Controllers/Api/GroupController.php`)
 - **Updated `assignSupervisor` Method**:
-    - Changed method signature to use Route Model Binding (`GroupTrip $group`).
-    - Updated validation to check for `supervisor_id` existence in the `users` table.
-    - Implemented logic to update the `supervisor_id` on the group.
-    - Returns a JSON response with the updated group and loaded supervisor relationship.
+    - **Authorization**: Removed the explicit `Auth::user()->role !== 'ADMIN'` check. Access is now controlled solely by `Route::middleware('role:ADMIN,SUPERVISOR')`, allowing both Admins and Supervisors to assign/reassign if authorized. This resolves the 403 "Unauthorized access" error for Supervisors.
+    - **Validation**: Enforced `'supervisor_id' => 'required|exists:users,user_id'` to ensure compatibility with the `users` table schema (`user_id` primary key).
+    - **Model Binding**: Used implicit Route Model Binding (`GroupTrip $group`) where `$group` argument matches `{group}` route parameter.
+    - **Response**: Returns JSON with `group` and loaded `supervisor`. The `User` model correctly serializes `user_id` instead of `id`.
 
 ```php
 public function assignSupervisor(Request $request, GroupTrip $group)
