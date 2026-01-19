@@ -18,7 +18,6 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:150|unique:users',
             'phone_number' => 'required|string|max:30',
             'password' => 'required|string|min:8',
-            'role' => 'required|in:Admin,Supervisor,Pilgrim,Support',
         ]);
 
         $user = User::create([
@@ -26,7 +25,7 @@ class AuthController extends Controller
             'email' => $request->email,
             'phone_number' => $request->phone_number,
             'password' => Hash::make($request->password), // Using hashed cast but safety first or redundant if cast works
-            'role' => $request->role,
+            'role' => 'Pilgrim',
             'account_status' => 'ACTIVE',
         ]);
 
