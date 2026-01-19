@@ -43,4 +43,14 @@ class GroupTrip extends Model
         )->withPivot('check_in_date', 'check_out_date', 'notes', 'assigned_by')
             ->withTimestamps();
     }
+
+    public function pilgrims()
+    {
+        return $this->belongsToMany(
+            Pilgrim::class,
+            'group_members',
+            'group_id',
+            'pilgrim_id'
+        )->withPivot('join_date', 'member_status');
+    }
 }

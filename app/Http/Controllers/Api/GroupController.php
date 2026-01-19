@@ -42,6 +42,56 @@ class GroupController extends Controller
         return response()->json($groups);
     }
 
+    // Create a new group (Global endpoint)
+    public function storeGroup(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255', // Maps to group_code
+            'trip_id' => 'required|exists:trips,trip_id',
+            'pilgrim_ids' => 'required|array',
+            'pilgrim_ids.*' => 'exists:users,user_id'
+        ]);
+
+        // Create Group
+        // Assuming current user is supervisor if not admin? 
+        // Or if 'supervisor_id' is not passed, maybe default to Auth::id() or null?
+        // The user request didn't specify supervisor, so we'll default to Auth::id() if applicable or leave it if nullable.
+        // Migration says supervisor_id is unsignedBigInteger.
+
+        $group = GroupTrip::create([
+            'group_code' => $validated['name'],
+            'trip_id' => $validated['trip_id'],
+            'supervisor_id' => Auth::id(), // Assign creator as supervisor default
+            'group_status' => 'ACTIVE'
+        ]);
+
+        // Link Pilgrims
+        $pilgrimIdsToSync = [];
+        foreach ($validated['pilgrim_ids'] as $userId) {
+            $user = \App\Models\User::find($userId);
+            if ($user) {
+                $pilgrim = \App\Models\Pilgrim::firstOrCreate(
+                    ['user_id' => $user->user_id],
+                    [
+                        'passport_name' => $user->full_name,
+                        'passport_number' => 'TEMP-' . $user->user_id,
+                        'nationality' => 'Unknown'
+                    ]
+                );
+                $pilgrimIdsToSync[] = $pilgrim->pilgrim_id;
+            }
+        }
+
+        // Sync (attach) pilgrims to the group
+        // Note: sync() replaces existing. Since it's a new group, it's fine.
+        $group->pilgrims()->sync($pilgrimIdsToSync);
+
+        return response()->json([
+            'message' => 'Group created successfully!',
+            'group' => $group->load('trip', 'pilgrims.user')
+        ], 201);
+    }
+
     // Create a new group for a trip
     public function store(Request $request, $trip_id)
     {

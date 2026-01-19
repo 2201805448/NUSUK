@@ -143,6 +143,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Let's modify api.php to point to a new method OR use a query param on a generic endpoint.
         // Cleaner: Route::get('/groups', [..,'index']); WITH ?trip_id=...
 
+        Route::post('/groups', [\App\Http\Controllers\Api\GroupController::class, 'storeGroup']); // Direct group creation
         Route::get('/groups', [\App\Http\Controllers\Api\GroupController::class, 'index']); // Generic list
         Route::get('/groups/{id}', [\App\Http\Controllers\Api\GroupController::class, 'show']);
         Route::put('/groups/{id}', [\App\Http\Controllers\Api\GroupController::class, 'update']);
