@@ -76,6 +76,14 @@ class BookingController extends Controller
     }
 
     /**
+     * Get bookings for the logged-in pilgrim (Alias for index or specific implementation)
+     */
+    public function myBookings(Request $request)
+    {
+        return $this->index($request);
+    }
+
+    /**
      * View a specific booking details
      */
     public function show($id)

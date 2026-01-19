@@ -68,6 +68,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/support/tickets/{id}/close', [\App\Http\Controllers\Api\SupportTicketController::class, 'close']);
 
     // Bookings
+    Route::get('/my-bookings', [\App\Http\Controllers\Api\BookingController::class, 'myBookings']);
     Route::get('/bookings', [\App\Http\Controllers\Api\BookingController::class, 'index']);
     Route::get('/bookings/{id}', [\App\Http\Controllers\Api\BookingController::class, 'show']);
     Route::post('/bookings', [\App\Http\Controllers\Api\BookingController::class, 'store']);
