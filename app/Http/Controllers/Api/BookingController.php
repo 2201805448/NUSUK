@@ -134,9 +134,10 @@ class BookingController extends Controller
         \Illuminate\Support\Facades\Log::info("Booking Attempt: User ID {$user->user_id}, Role: {$user->role}");
 
         // Only pilgrims can create bookings
-        // Only pilgrims can create bookings
-        if (Str::lower(trim($request->user()->role)) !== 'pilgrim') {
-            return response()->json(['message' => 'Access denied'], 403);
+        $userRole = Str::lower(trim($request->user()->role));
+        if ($userRole !== 'pilgrim') {
+            \Illuminate\Support\Facades\Log::warning("Booking Access Denied: User Role '{$userRole}' is not 'pilgrim'.");
+            return response()->json(['message' => "Access denied. Your role is: {$request->user()->role}"], 403);
         }
 
         $request->validate([
