@@ -13,6 +13,17 @@ Route::post('/password/send-code', [PasswordResetController::class, 'sendResetCo
 Route::post('/password/verify-code', [PasswordResetController::class, 'verifyResetCode']);
 Route::post('/password/reset', [PasswordResetController::class, 'resetPassword']);
 
+// Public Routes (Packages & Accommodations)
+Route::get('/packages', [\App\Http\Controllers\Api\PackageController::class, 'index']);
+Route::get('/packages/{id}', [\App\Http\Controllers\Api\PackageController::class, 'show']);
+Route::get('/packages/{id}/reviews', [\App\Http\Controllers\Api\PackageController::class, 'getTripReviews']);
+Route::get('/trips/{id}/hotel-reviews', [\App\Http\Controllers\Api\TripController::class, 'getHotelReviews']);
+
+Route::get('/accommodations', [\App\Http\Controllers\Api\AccommodationController::class, 'index']);
+Route::get('/accommodations/{id}', [\App\Http\Controllers\Api\AccommodationController::class, 'show']);
+Route::get('/rooms', [\App\Http\Controllers\Api\RoomController::class, 'index']);
+Route::get('/rooms/{id}', [\App\Http\Controllers\Api\RoomController::class, 'show']);
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/password/change', [AuthController::class, 'changePassword']);
@@ -55,18 +66,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/support/tickets/{id}/reply', [\App\Http\Controllers\Api\SupportTicketController::class, 'reply']);
     Route::post('/support/tickets/{id}/transfer', [\App\Http\Controllers\Api\SupportTicketController::class, 'transfer']);
     Route::post('/support/tickets/{id}/close', [\App\Http\Controllers\Api\SupportTicketController::class, 'close']);
-
-    // Packages (Available to all authenticated users)
-    Route::get('/packages', [\App\Http\Controllers\Api\PackageController::class, 'index']);
-    Route::get('/packages/{id}', [\App\Http\Controllers\Api\PackageController::class, 'show']);
-    Route::get('/packages/{id}/reviews', [\App\Http\Controllers\Api\PackageController::class, 'getTripReviews']);
-    Route::get('/trips/{id}/hotel-reviews', [\App\Http\Controllers\Api\TripController::class, 'getHotelReviews']);
-
-    // Accommodations & Rooms (Read Access for all authenticated users)
-    Route::get('/accommodations', [\App\Http\Controllers\Api\AccommodationController::class, 'index']);
-    Route::get('/accommodations/{id}', [\App\Http\Controllers\Api\AccommodationController::class, 'show']);
-    Route::get('/rooms', [\App\Http\Controllers\Api\RoomController::class, 'index']);
-    Route::get('/rooms/{id}', [\App\Http\Controllers\Api\RoomController::class, 'show']);
 
     // Bookings
     Route::get('/bookings', [\App\Http\Controllers\Api\BookingController::class, 'index']);
