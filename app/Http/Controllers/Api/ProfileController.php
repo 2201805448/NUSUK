@@ -56,9 +56,11 @@ class ProfileController extends Controller
             'gender' => 'nullable|string|in:MALE,FEMALE', // Key fix: Uppercase MALE/FEMALE
             'date_of_birth' => 'nullable|date',
             'emergency_call' => 'nullable|string|max:50',
+            'passport_img' => 'nullable|image|mimes:jpg,png,jpeg|max:2048',
+            'visa_img' => 'nullable|image|mimes:jpg,png,jpeg|max:2048',
         ]);
 
-        DB::transaction(function () use ($user, $validated) {
+        DB::transaction(function () use ($user, $validated, $request) {
             // 1. Update User Table
             $user->update([
                 'full_name' => $validated['full_name'] ?? $user->full_name,
@@ -67,17 +69,28 @@ class ProfileController extends Controller
             ]);
 
             // 2. Update or Create Pilgrim Record
-            // Extract pilgrim specific fields ensuring we only take what was validated and present
+            // Extract pilgrim specific fields
             $pilgrimFields = [
                 'passport_name',
                 'passport_number',
                 'nationality',
                 'gender',
                 'date_of_birth',
-                'emergency_call'
+                'emergency_call',
             ];
 
             $pilgrimData = array_intersect_key($validated, array_flip($pilgrimFields));
+
+            // Handle File Uploads
+            if ($request->hasFile('passport_img')) {
+                $path = $request->file('passport_img')->store('pilgrims/passports', 'public');
+                $pilgrimData['passport_img'] = $path;
+            }
+
+            if ($request->hasFile('visa_img')) {
+                $path = $request->file('visa_img')->store('pilgrims/visas', 'public');
+                $pilgrimData['visa_img'] = $path;
+            }
 
             if (!empty($pilgrimData)) {
                 $user->pilgrim()->updateOrCreate(
