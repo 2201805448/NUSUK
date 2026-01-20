@@ -47,7 +47,8 @@ class PilgrimCardController extends Controller
             $groupData = [
                 'group_code' => $activeMember->groupTrip->group_code,
                 'trip_name' => $activeMember->groupTrip->trip->trip_name ?? 'N/A',
-                'supervisor' => $activeMember->groupTrip->supervisor->full_name ?? 'Unassigned'
+                'supervisor' => $activeMember->groupTrip->supervisor->full_name ?? 'Unassigned',
+                'supervisor_phone' => $activeMember->groupTrip->supervisor->phone_number ?? 'N/A'
             ];
         }
 
