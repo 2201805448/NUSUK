@@ -36,19 +36,59 @@ class ProfileController extends Controller
     /**
      * Update the authenticated User's profile.
      * Allowed fields: full_name, email, phone_number.
+     * Pilgrim fields: passport_number, gender, nationality, emergency_call, etc.
      * Blocked fields: role, account_status.
      */
     public function update(Request $request)
     {
         $user = $request->user();
 
-        $request->validate([
+        $validated = $request->validate([
+            // User fields
             'full_name' => 'sometimes|string|max:150',
             'email' => 'sometimes|string|email|max:150|unique:users,email,' . $user->user_id . ',user_id',
             'phone_number' => 'sometimes|string|max:30',
+
+            // Pilgrim fields
+            'passport_name' => 'nullable|string|max:150',
+            'passport_number' => 'nullable|string|max:50',
+            'nationality' => 'nullable|string|max:100',
+            'gender' => 'nullable|string|in:male,female',
+            'date_of_birth' => 'nullable|date',
+            'emergency_call' => 'nullable|string|max:50',
         ]);
 
-        $user->update($request->only(['full_name', 'email', 'phone_number']));
+        DB::transaction(function () use ($user, $validated) {
+            // 1. Update User Table
+            $user->update([
+                'full_name' => $validated['full_name'] ?? $user->full_name,
+                'email' => $validated['email'] ?? $user->email,
+                'phone_number' => $validated['phone_number'] ?? $user->phone_number,
+            ]);
+
+            // 2. Update or Create Pilgrim Record
+            // Extract pilgrim specific fields ensuring we only take what was validated and present
+            $pilgrimFields = [
+                'passport_name',
+                'passport_number',
+                'nationality',
+                'gender',
+                'date_of_birth',
+                'emergency_call'
+            ];
+
+            $pilgrimData = array_intersect_key($validated, array_flip($pilgrimFields));
+
+            if (!empty($pilgrimData)) {
+                $user->pilgrim()->updateOrCreate(
+                    ['user_id' => $user->user_id], // Search attributes
+                    $pilgrimData                   // Values to update
+                );
+            }
+        });
+
+        // Reload pilgrim relationship to return complete object
+        $user->load('pilgrim');
 
         return response()->json([
             'message' => 'Profile updated successfully',
