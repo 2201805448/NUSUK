@@ -138,16 +138,39 @@ class GroupController extends Controller
             return response()->json(['message' => 'Unauthorized access to this group.'], 403);
         }
 
-        $request->validate([
+        $validated = $request->validate([
             'group_code' => 'sometimes|string|max:50|unique:groups_trips,group_code,' . $group->group_id . ',group_id',
             'group_status' => 'in:ACTIVE,FINISHED',
+            'pilgrim_ids' => 'sometimes|array',
+            'pilgrim_ids.*' => 'exists:users,user_id'
         ]);
 
         $group->update($request->only(['group_code', 'group_status']));
 
+        // Sync Pilgrims if provided
+        if ($request->has('pilgrim_ids')) {
+            $pilgrimIdsToSync = [];
+            foreach ($validated['pilgrim_ids'] as $userId) {
+                $user = \App\Models\User::find($userId);
+                if ($user) {
+                    $pilgrim = \App\Models\Pilgrim::firstOrCreate(
+                        ['user_id' => $user->user_id],
+                        [
+                            'passport_name' => $user->full_name,
+                            'passport_number' => 'TEMP-' . $user->user_id,
+                            'nationality' => 'Unknown'
+                        ]
+                    );
+                    $pilgrimIdsToSync[] = $pilgrim->pilgrim_id;
+                }
+            }
+            // Sync (attach/detach) pilgrims to the group
+            $group->pilgrims()->sync($pilgrimIdsToSync);
+        }
+
         return response()->json([
             'message' => 'Group updated successfully',
-            'group' => $group
+            'group' => $group->load('pilgrims.user')
         ]);
     }
 
