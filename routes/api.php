@@ -107,6 +107,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/trips/{id}/groups', [\App\Http\Controllers\Api\GroupController::class, 'store']);
         Route::get('/trips/{id}/groups', [\App\Http\Controllers\Api\GroupController::class, 'index']); // Trip-specific
 
+        // All Pilgrims (Admin/Supervisor)
+        Route::get('/pilgrims', [\App\Http\Controllers\Api\PilgrimController::class, 'index']);
+
         // Pilgrims List (for Supervisor viewing their pilgrims)
         Route::get('/my-pilgrims', [\App\Http\Controllers\Api\GroupController::class, 'listAllPilgrims']); // All pilgrims in supervisor's groups
         Route::get('/groups/{id}/pilgrims', [\App\Http\Controllers\Api\GroupController::class, 'listPilgrims']); // Pilgrims in specific group
