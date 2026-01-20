@@ -49,7 +49,11 @@ class User extends Authenticatable
      */
     public function setRoleAttribute($value)
     {
-        $this->attributes['role'] = ucfirst(strtolower($value));
+        if (strtoupper($value) === 'USER') {
+            $this->attributes['role'] = 'Pilgrim';
+        } else {
+            $this->attributes['role'] = ucfirst(strtolower($value));
+        }
     }
 
     /**

@@ -54,12 +54,17 @@ class AdminController extends Controller
     // 3. Store User
     public function store(Request $request)
     {
+        // Normalize 'USER' to 'Pilgrim' before validation
+        if (strtoupper($request->role) === 'USER') {
+            $request->merge(['role' => 'Pilgrim']);
+        }
+
         $request->validate([
             'full_name' => 'required|string|max:150',
             'email' => 'required|string|email|max:150|unique:users',
             'phone_number' => 'required|string|max:30',
             'password' => 'required|string|min:8',
-            'role' => 'required|in:ADMIN,USER,SUPERVISOR,SUPPORT,PILGRIM',
+            'role' => 'required|in:ADMIN,SUPERVISOR,SUPPORT,Pilgrim',
             'account_status' => 'sometimes|in:ACTIVE,INACTIVE,BLOCKED'
         ]);
 
@@ -90,11 +95,16 @@ class AdminController extends Controller
     {
         $user = User::findOrFail($id);
 
+        // Normalize 'USER' to 'Pilgrim' before validation
+        if ($request->has('role') && strtoupper($request->role) === 'USER') {
+            $request->merge(['role' => 'Pilgrim']);
+        }
+
         $request->validate([
             'full_name' => 'sometimes|string|max:150',
             'email' => 'sometimes|string|email|max:150|unique:users,email,' . $id . ',user_id',
             'phone_number' => 'sometimes|string|max:30',
-            'role' => 'sometimes|in:ADMIN,USER,SUPERVISOR,SUPPORT,PILGRIM',
+            'role' => 'sometimes|in:ADMIN,SUPERVISOR,SUPPORT,Pilgrim',
             'account_status' => 'sometimes|in:ACTIVE,INACTIVE,BLOCKED',
             'password' => 'sometimes|string|min:8'
         ]);
