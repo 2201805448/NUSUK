@@ -53,7 +53,7 @@ class ProfileController extends Controller
             'passport_name' => 'nullable|string|max:150',
             'passport_number' => 'nullable|string|max:50',
             'nationality' => 'nullable|string|max:100',
-            'gender' => 'nullable|string|in:male,female',
+            'gender' => 'nullable|string|in:MALE,FEMALE', // Key fix: Uppercase MALE/FEMALE
             'date_of_birth' => 'nullable|date',
             'emergency_call' => 'nullable|string|max:50',
         ]);

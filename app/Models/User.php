@@ -22,6 +22,13 @@ class User extends Authenticatable
         'password',
         'role',
         'account_status',
+        // Unified fields for potential User-level access or mass assignment
+        'passport_name',
+        'passport_number',
+        'nationality',
+        'gender',
+        'date_of_birth',
+        'emergency_call',
     ];
 
     // لأن جدولك فيه created_at و updated_at
