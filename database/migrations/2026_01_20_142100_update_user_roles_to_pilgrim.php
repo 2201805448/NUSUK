@@ -27,6 +27,25 @@ return new class extends Migration {
         DB::table('users')
             ->where('role', 'PILGRIM')
             ->update(['role' => 'Pilgrim']);
+
+        // Backfill missing Pilgrim records
+        $pilgrimUsers = User::where('role', 'Pilgrim')->get();
+
+        foreach ($pilgrimUsers as $user) {
+            // Check if pilgrim record exists
+            $exists = DB::table('pilgrims')->where('user_id', $user->user_id)->exists();
+
+            if (!$exists) {
+                DB::table('pilgrims')->insert([
+                    'user_id' => $user->user_id,
+                    'passport_name' => $user->full_name, // Use full name as passport name fallback
+                    'passport_number' => 'PENDING',    // Placeholder
+                    'nationality' => 'Unknown',        // Placeholder
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
     }
 
     /**

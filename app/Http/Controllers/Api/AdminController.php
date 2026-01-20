@@ -77,6 +77,16 @@ class AdminController extends Controller
             'account_status' => $request->account_status ?? 'ACTIVE',
         ]);
 
+        // Automatically create Pilgrim record if the role is Pilgrim
+        if ($user->role === 'Pilgrim') {
+            Pilgrim::create([
+                'user_id' => $user->user_id,
+                'passport_name' => $user->full_name,
+                'passport_number' => 'PENDING', // Placeholder
+                'nationality' => 'Unknown',    // Placeholder
+            ]);
+        }
+
         return response()->json([
             'message' => 'User created successfully',
             'user' => $user
