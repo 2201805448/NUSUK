@@ -118,7 +118,7 @@ class GroupController extends Controller
     // Get specific group details with members
     public function show($id)
     {
-        $group = GroupTrip::with(['members.pilgrim.user'])->findOrFail($id);
+        $group = GroupTrip::with(['supervisor', 'members.pilgrim.user'])->findOrFail($id);
 
         // Optional: Check if the authenticated user is the supervisor of this group or an Admin
         if (Auth::user()->role !== 'ADMIN' && $group->supervisor_id !== Auth::id()) {

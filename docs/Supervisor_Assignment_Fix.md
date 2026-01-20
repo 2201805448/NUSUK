@@ -59,3 +59,11 @@ public function assignSupervisor(Request $request, GroupTrip $group)
         }
     }
     ```
+
+## Additional Verifications
+- **Eager Loading**:
+    - The `GroupController::index` method uses `GroupTrip::with(['supervisor'])`, ensuring supervisor data is available in lists.
+    - Updated `GroupController::show` to also use `GroupTrip::with(['supervisor', ...])`, solving the missing supervisor name in detail views.
+- **Foreign Key Logic**:
+    - Verified migration `create_groups_trips_table.php` defines FK constraint: `supervisor_id` references `users.user_id`. This confirms database integrity for the relationship.
+
