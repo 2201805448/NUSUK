@@ -34,7 +34,35 @@ class AdminBookingController extends Controller
      */
     public function show($id)
     {
-        $booking = Booking::with(['user', 'package', 'trip', 'payments', 'modifications'])->findOrFail($id);
+        $booking = Booking::with(['user', 'package', 'trip', 'payments', 'modifications', 'attendees.pilgrim'])->findOrFail($id);
+
+        // Calculate Booking Payment Status
+        // Payment model has 'payment_status', so we use that.
+        $totalPaid = $booking->payments->where('payment_status', 'PAID')->sum('amount');
+
+        $isPaid = $totalPaid >= $booking->total_price;
+        $isOverdue = !$isPaid && \Carbon\Carbon::parse($booking->booking_date)->addDays(3)->isPast(); // Example: Overdue after 3 days
+
+        $paymentStatus = 'UNPAID';
+        if ($isPaid) {
+            $paymentStatus = 'PAID';
+        } elseif ($isOverdue) {
+            $paymentStatus = 'OVERDUE';
+        }
+
+        // Attach computed status to booking or attendees
+        // Requirement: "view the payment status for each Umrah pilgrim"
+        // Since attendees are part of the same booking, they share the booking's payment status unless we have per-attendee payments (which we don't, payments are per booking).
+        // So we assign the booking's status to all attendees for display purposes.
+
+        $booking->attendees->each(function ($attendee) use ($paymentStatus) {
+            $attendee->payment_status = $paymentStatus;
+        });
+
+        // Also append it to the main booking object for convenience
+        $booking->payment_status = $paymentStatus;
+        $booking->total_paid = $totalPaid;
+
         return response()->json($booking);
     }
 
