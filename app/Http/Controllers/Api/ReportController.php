@@ -77,6 +77,75 @@ class ReportController extends Controller
         ]);
     }
 
+    /**
+     * Get Booking Report
+     */
+    public function bookingReport(Request $request)
+    {
+        $request->validate([
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'status' => 'nullable|string',
+            'trip_id' => 'nullable|exists:trips,trip_id',
+        ]);
+
+        $query = Booking::with(['user', 'trip', 'attendees']);
+
+        // Apply Filters
+        if ($request->has('start_date') && $request->start_date) {
+            $query->whereDate('booking_date', '>=', $request->start_date);
+        }
+        if ($request->has('end_date') && $request->end_date) {
+            $query->whereDate('booking_date', '<=', $request->end_date);
+        }
+        if ($request->has('status') && $request->status) {
+            $query->where('status', $request->status);
+        }
+        if ($request->has('trip_id') && $request->trip_id) {
+            $query->where('trip_id', $request->trip_id);
+        }
+
+        $bookings = $query->orderBy('booking_date', 'desc')->get();
+
+        // Aggregated Data
+        $totalBookings = $bookings->count();
+        $totalPax = $bookings->sum(function ($booking) {
+            return $booking->attendees->count();
+        });
+        $totalValue = $bookings->sum('total_price');
+
+        // Status Breakdown
+        $statusBreakdown = $bookings->groupBy('status')->map->count();
+
+        // Format Records
+        $records = $bookings->map(function ($booking) {
+            return [
+                'booking_id' => $booking->booking_id,
+                'booking_ref' => $booking->booking_ref,
+                'booking_date' => $booking->booking_date,
+                'trip_name' => $booking->trip->trip_name ?? 'N/A',
+                'user_name' => $booking->user->full_name ?? 'N/A',
+                'pax_count' => $booking->attendees->count(),
+                'total_price' => $booking->total_price,
+                'status' => $booking->status,
+            ];
+        });
+
+        return response()->json([
+            'meta' => [
+                'filters' => $request->only(['start_date', 'end_date', 'status', 'trip_id']),
+                'generated_at' => now()->toDateTimeString(),
+            ],
+            'summary' => [
+                'total_bookings' => $totalBookings,
+                'total_pax' => $totalPax,
+                'total_value' => $totalValue,
+                'status_breakdown' => $statusBreakdown,
+            ],
+            'records' => $records
+        ]);
+    }
+
     public function exportTrips(Request $request)
     {
         $request->validate([

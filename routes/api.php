@@ -204,6 +204,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/reports/trips', [\App\Http\Controllers\Api\AdminController::class, 'tripReports']);
         Route::get('/reports/trips/export', [\App\Http\Controllers\Api\ReportController::class, 'exportTrips']);
         Route::get('/reports/revenue', [\App\Http\Controllers\Api\ReportController::class, 'revenueReport']);
+        Route::get('/reports/bookings', [\App\Http\Controllers\Api\ReportController::class, 'bookingReport']);
 
         // Package Management
         Route::post('/packages', [\App\Http\Controllers\Api\PackageController::class, 'store']);
