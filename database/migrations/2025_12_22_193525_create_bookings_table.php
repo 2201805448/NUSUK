@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         Schema::create('bookings', function (Blueprint $table) {
@@ -22,7 +21,7 @@ return new class extends Migration
             $table->decimal('total_price', 10, 2)->default(0.00);
             $table->string('pay_method', 50)->nullable();
 
-            $table->enum('status', ['PENDING', 'CONFIRMED', 'CANCELLED'])->default('PENDING');
+            $table->enum('status', ['PENDING', 'CONFIRMED', 'CANCELLED', 'REJECTED'])->default('PENDING');
             $table->text('request_notes')->nullable();
             $table->text('admin_reply')->nullable();
 
