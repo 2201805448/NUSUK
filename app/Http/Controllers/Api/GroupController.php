@@ -511,5 +511,25 @@ class GroupController extends Controller
             'pilgrims' => $activePilgrims->values(),
         ]);
     }
+    /**
+     * Delete a group
+     */
+    public function destroy($id)
+    {
+        try {
+            $group = GroupTrip::findOrFail($id);
+            $group->delete();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Group deleted successfully'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to delete group'
+            ], 500);
+        }
+    }
 }
 

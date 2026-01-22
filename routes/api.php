@@ -249,6 +249,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/groups/{id}', [\App\Http\Controllers\Api\GroupController::class, 'update']);
         Route::post('/trips/{id}/groups', [\App\Http\Controllers\Api\GroupController::class, 'store']);
         Route::get('/trips/{id}/groups', [\App\Http\Controllers\Api\GroupController::class, 'index']);
+        Route::delete('/groups/{id}', [\App\Http\Controllers\Api\GroupController::class, 'destroy']);
 
         // Group Members Management
         Route::post('/groups/{id}/members', [\App\Http\Controllers\Api\GroupController::class, 'addMember']);
