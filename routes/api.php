@@ -103,16 +103,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/trips', [\App\Http\Controllers\Api\TripController::class, 'index']);
         Route::get('/trips/{id}', [\App\Http\Controllers\Api\TripController::class, 'show']);
 
-        Route::get('/groups', [\App\Http\Controllers\Api\GroupController::class, 'index']); // General list (filtered by role)
-        Route::post('/trips/{id}/groups', [\App\Http\Controllers\Api\GroupController::class, 'store']);
-        Route::get('/trips/{id}/groups', [\App\Http\Controllers\Api\GroupController::class, 'index']); // Trip-specific
+        // Route::get('/groups', [\App\Http\Controllers\Api\GroupController::class, 'index']); // MOVED TO ADMIN
+        // Route::post('/trips/{id}/groups', [\App\Http\Controllers\Api\GroupController::class, 'store']); // MOVED TO ADMIN
+        // Route::get('/trips/{id}/groups', [\App\Http\Controllers\Api\GroupController::class, 'index']); // MOVED TO ADMIN
 
         // All Pilgrims (Admin/Supervisor)
         Route::get('/pilgrims', [\App\Http\Controllers\Api\PilgrimController::class, 'index']);
 
-        // Pilgrims List (for Supervisor viewing their pilgrims)
-        Route::get('/my-pilgrims', [\App\Http\Controllers\Api\GroupController::class, 'listAllPilgrims']); // All pilgrims in supervisor's groups
-        Route::get('/groups/{id}/pilgrims', [\App\Http\Controllers\Api\GroupController::class, 'listPilgrims']); // Pilgrims in specific group
+        // Pilgrims List (for Supervisor viewing their pilgrims) - MOVED TO ADMIN
+        // Route::get('/my-pilgrims', [\App\Http\Controllers\Api\GroupController::class, 'listAllPilgrims']); 
+        // Route::get('/groups/{id}/pilgrims', [\App\Http\Controllers\Api\GroupController::class, 'listPilgrims']);
 
         // View Pilgrim Notes (for Supervisor/Admin)
         Route::get('/pilgrim-notes', [\App\Http\Controllers\Api\PilgrimNoteController::class, 'index']);
@@ -120,11 +120,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/pilgrim-notes/{note_id}/respond', [\App\Http\Controllers\Api\PilgrimNoteController::class, 'respond']);
 
         // Group Accommodations (Link accommodation to groups)
-        Route::get('/groups/{group_id}/accommodations', [\App\Http\Controllers\Api\GroupAccommodationController::class, 'index']);
-        Route::post('/groups/{group_id}/accommodations', [\App\Http\Controllers\Api\GroupAccommodationController::class, 'link']);
-        Route::put('/groups/{group_id}/accommodations/{accommodation_id}', [\App\Http\Controllers\Api\GroupAccommodationController::class, 'update']);
-        Route::delete('/groups/{group_id}/accommodations/{accommodation_id}', [\App\Http\Controllers\Api\GroupAccommodationController::class, 'unlink']);
-        Route::post('/group-accommodations/bulk-link', [\App\Http\Controllers\Api\GroupAccommodationController::class, 'bulkLink']);
+        // Group Accommodations (Link accommodation to groups) - MOVED TO ADMIN
+        // Route::get('/groups/{group_id}/accommodations', ...);
+        // Route::post('/groups/{group_id}/accommodations', ...);
+        // Route::put('/groups/{group_id}/accommodations/{accommodation_id}', ...);
+        // Route::delete('/groups/{group_id}/accommodations/{accommodation_id}', ...);
+        // Route::post('/group-accommodations/bulk-link', ...);
 
         // Trip Documents (Upload)
         Route::post('/trips/{trip_id}/documents', [\App\Http\Controllers\Api\TripDocumentController::class, 'store']);
@@ -146,15 +147,15 @@ Route::middleware('auth:sanctum')->group(function () {
         // Let's modify api.php to point to a new method OR use a query param on a generic endpoint.
         // Cleaner: Route::get('/groups', [..,'index']); WITH ?trip_id=...
 
-        Route::post('/groups', [\App\Http\Controllers\Api\GroupController::class, 'storeGroup']); // Direct group creation
-        Route::get('/groups', [\App\Http\Controllers\Api\GroupController::class, 'index']); // Generic list
-        Route::get('/groups/{id}', [\App\Http\Controllers\Api\GroupController::class, 'show']);
-        Route::put('/groups/{id}', [\App\Http\Controllers\Api\GroupController::class, 'update']);
-        Route::post('/groups/{id}/members', [\App\Http\Controllers\Api\GroupController::class, 'addMember']);
-        Route::post('/groups/{id}/transfer', [\App\Http\Controllers\Api\GroupController::class, 'transferMember']);
-        Route::post('/groups/{id}/remove', [\App\Http\Controllers\Api\GroupController::class, 'removeMember']);
-        Route::post('/groups/{group}/supervisor', [\App\Http\Controllers\Api\GroupController::class, 'assignSupervisor']);
-        Route::put('/groups/{id}/unassign-supervisor', [\App\Http\Controllers\Api\GroupController::class, 'unassignSupervisor']);
+        // Route::post('/groups', [\App\Http\Controllers\Api\GroupController::class, 'storeGroup']); // MOVED TO ADMIN
+        // Route::get('/groups', [\App\Http\Controllers\Api\GroupController::class, 'index']); // MOVED TO ADMIN
+        // Route::get('/groups/{id}', [\App\Http\Controllers\Api\GroupController::class, 'show']); // MOVED TO ADMIN
+        // Route::put('/groups/{id}', [\App\Http\Controllers\Api\GroupController::class, 'update']); // MOVED TO ADMIN
+        // Route::post('/groups/{id}/members', [\App\Http\Controllers\Api\GroupController::class, 'addMember']); // MOVED TO ADMIN
+        // Route::post('/groups/{id}/transfer', [\App\Http\Controllers\Api\GroupController::class, 'transferMember']); // MOVED TO ADMIN
+        // Route::post('/groups/{id}/remove', [\App\Http\Controllers\Api\GroupController::class, 'removeMember']); // MOVED TO ADMIN
+        // Route::post('/groups/{group}/supervisor', [\App\Http\Controllers\Api\GroupController::class, 'assignSupervisor']); // MOVED TO ADMIN
+        // Route::put('/groups/{id}/unassign-supervisor', [\App\Http\Controllers\Api\GroupController::class, 'unassignSupervisor']); // MOVED TO ADMIN
 
         // Monitoring
         Route::get('/trips/{id}/housing', [\App\Http\Controllers\Api\AccommodationController::class, 'getHousingData']);
@@ -176,7 +177,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Notifications
         Route::post('/notifications/general', [\App\Http\Controllers\Api\NotificationController::class, 'sendGeneral']);
         Route::post('/trips/{id}/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'sendTrip']);
-        Route::post('/groups/{id}/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'sendGroup']);
+        // Route::post('/groups/{id}/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'sendGroup']); // MOVED TO ADMIN
 
         // Trip Updates (Feed)
         Route::post('/trips/{id}/updates', [\App\Http\Controllers\Api\TripUpdateController::class, 'store']);
@@ -240,6 +241,37 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/booking-modifications', [\App\Http\Controllers\Api\AdminBookingController::class, 'indexModifications']);
         Route::put('/booking-modifications/{id}/status', [\App\Http\Controllers\Api\AdminBookingController::class, 'updateModificationStatus']);
+
+        // Group Management (Exclusively Manager/Admin)
+        Route::get('/groups', [\App\Http\Controllers\Api\GroupController::class, 'index']);
+        Route::post('/groups', [\App\Http\Controllers\Api\GroupController::class, 'storeGroup']);
+        Route::get('/groups/{id}', [\App\Http\Controllers\Api\GroupController::class, 'show']);
+        Route::put('/groups/{id}', [\App\Http\Controllers\Api\GroupController::class, 'update']);
+        Route::post('/trips/{id}/groups', [\App\Http\Controllers\Api\GroupController::class, 'store']);
+        Route::get('/trips/{id}/groups', [\App\Http\Controllers\Api\GroupController::class, 'index']);
+
+        // Group Members Management
+        Route::post('/groups/{id}/members', [\App\Http\Controllers\Api\GroupController::class, 'addMember']);
+        Route::post('/groups/{id}/transfer', [\App\Http\Controllers\Api\GroupController::class, 'transferMember']);
+        Route::post('/groups/{id}/remove', [\App\Http\Controllers\Api\GroupController::class, 'removeMember']);
+
+        // Supervisor Management
+        Route::post('/groups/{group}/supervisor', [\App\Http\Controllers\Api\GroupController::class, 'assignSupervisor']);
+        Route::put('/groups/{id}/unassign-supervisor', [\App\Http\Controllers\Api\GroupController::class, 'unassignSupervisor']);
+
+        // Listings
+        Route::get('/my-pilgrims', [\App\Http\Controllers\Api\GroupController::class, 'listAllPilgrims']);
+        Route::get('/groups/{id}/pilgrims', [\App\Http\Controllers\Api\GroupController::class, 'listPilgrims']);
+
+        // Group Accommodations
+        Route::get('/groups/{group_id}/accommodations', [\App\Http\Controllers\Api\GroupAccommodationController::class, 'index']);
+        Route::post('/groups/{group_id}/accommodations', [\App\Http\Controllers\Api\GroupAccommodationController::class, 'link']);
+        Route::put('/groups/{group_id}/accommodations/{accommodation_id}', [\App\Http\Controllers\Api\GroupAccommodationController::class, 'update']);
+        Route::delete('/groups/{group_id}/accommodations/{accommodation_id}', [\App\Http\Controllers\Api\GroupAccommodationController::class, 'unlink']);
+        Route::post('/group-accommodations/bulk-link', [\App\Http\Controllers\Api\GroupAccommodationController::class, 'bulkLink']);
+
+        // Group Notifications
+        Route::post('/groups/{id}/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'sendGroup']);
 
     });
 });

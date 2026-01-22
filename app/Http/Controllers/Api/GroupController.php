@@ -15,20 +15,14 @@ class GroupController extends Controller
     {
         $query = GroupTrip::with(['supervisor']);
 
-        // Check route param first, then query param
         if ($trip_id) {
             $query->where('trip_id', $trip_id);
         } elseif ($request->has('trip_id')) {
             $query->where('trip_id', $request->trip_id);
         }
 
-        // Role-based filtering
-        $user = Auth::user();
-        if ($user->role === 'SUPERVISOR') {
-            $query->where('supervisor_id', $user->user_id);
-        }
-        // Admin sees all (no extra filter)
 
+        $user = Auth::user();
         $groups = $query->get();
         // DEBUG: Attach role info to first item if exists or wrap response
         if ($request->has('debug')) {
@@ -120,10 +114,10 @@ class GroupController extends Controller
     {
         $group = GroupTrip::with(['supervisor', 'members.pilgrim.user'])->findOrFail($id);
 
-        // Optional: Check if the authenticated user is the supervisor of this group or an Admin
-        if (Auth::user()->role !== 'ADMIN' && $group->supervisor_id !== Auth::id()) {
-            return response()->json(['message' => 'Unauthorized access to this group.'], 403);
-        }
+        // Admin only (middleware handled)
+        // if (Auth::user()->role !== 'ADMIN' && $group->supervisor_id !== Auth::id()) {
+        //     return response()->json(['message' => 'Unauthorized access to this group.'], 403);
+        // }
 
         return response()->json($group);
     }
@@ -133,10 +127,10 @@ class GroupController extends Controller
     {
         $group = GroupTrip::findOrFail($id);
 
-        // Authorization Check
-        if (Auth::user()->role !== 'ADMIN' && $group->supervisor_id !== Auth::id()) {
-            return response()->json(['message' => 'Unauthorized access to this group.'], 403);
-        }
+        // Authorization Check handled by middleware
+        // if (Auth::user()->role !== 'ADMIN' && $group->supervisor_id !== Auth::id()) {
+        //     return response()->json(['message' => 'Unauthorized access to this group.'], 403);
+        // }
 
         $validated = $request->validate([
             'group_code' => 'sometimes|string|max:50|unique:groups_trips,group_code,' . $group->group_id . ',group_id',
@@ -179,9 +173,9 @@ class GroupController extends Controller
     {
         $group = GroupTrip::findOrFail($id);
 
-        if (Auth::user()->role !== 'ADMIN' && $group->supervisor_id !== Auth::id()) {
-            return response()->json(['message' => 'Unauthorized access to this group.'], 403);
-        }
+        // if (Auth::user()->role !== 'ADMIN' && $group->supervisor_id !== Auth::id()) {
+        //     return response()->json(['message' => 'Unauthorized access to this group.'], 403);
+        // }
 
         $request->validate([
             'user_id' => 'required|exists:users,user_id', // Accept User ID
@@ -238,13 +232,13 @@ class GroupController extends Controller
             return response()->json(['message' => 'Cannot transfer between groups of different trips.'], 400);
         }
 
-        // Authorization: Supervisor must own both groups OR be Admin
-        $isAuthorized = (Auth::user()->role === 'ADMIN') ||
-            ($sourceGroup->supervisor_id === Auth::id() && $targetGroup->supervisor_id === Auth::id());
+        // Authorization: Admin only
+        // $isAuthorized = (Auth::user()->role === 'ADMIN') ||
+        //     ($sourceGroup->supervisor_id === Auth::id() && $targetGroup->supervisor_id === Auth::id());
 
-        if (!$isAuthorized) {
-            return response()->json(['message' => 'Unauthorized transfer.'], 403);
-        }
+        // if (!$isAuthorized) {
+        //     return response()->json(['message' => 'Unauthorized transfer.'], 403);
+        // }
 
         // Get Pilgrim ID
         $user = \App\Models\User::findOrFail($request->user_id);
@@ -298,9 +292,9 @@ class GroupController extends Controller
     {
         $group = GroupTrip::findOrFail($id);
 
-        if (Auth::user()->role !== 'ADMIN' && $group->supervisor_id !== Auth::id()) {
-            return response()->json(['message' => 'Unauthorized access to this group.'], 403);
-        }
+        // if (Auth::user()->role !== 'ADMIN' && $group->supervisor_id !== Auth::id()) {
+        //     return response()->json(['message' => 'Unauthorized access to this group.'], 403);
+        // }
 
         $request->validate([
             'user_id' => 'required|exists:users,user_id',
@@ -383,10 +377,10 @@ class GroupController extends Controller
         $group = GroupTrip::with(['trip', 'supervisor', 'members.pilgrim.user'])
             ->findOrFail($id);
 
-        // Authorization: Must be supervisor of this group or Admin
-        if (Auth::user()->role !== 'ADMIN' && $group->supervisor_id !== Auth::id()) {
-            return response()->json(['message' => 'Unauthorized access to this group.'], 403);
-        }
+        // Authorization: Admin only
+        // if (Auth::user()->role !== 'ADMIN' && $group->supervisor_id !== Auth::id()) {
+        //     return response()->json(['message' => 'Unauthorized access to this group.'], 403);
+        // }
 
         // Format pilgrims list
         $pilgrims = $group->members->map(function ($member) {
@@ -456,9 +450,9 @@ class GroupController extends Controller
         }
 
         // Role-based filtering
-        if ($user->role === 'SUPERVISOR') {
-            $query->where('supervisor_id', $user->user_id);
-        }
+        // if ($user->role === 'SUPERVISOR') {
+        //     $query->where('supervisor_id', $user->user_id);
+        // }
         // Admin sees all groups
 
         $groups = $query->get();
