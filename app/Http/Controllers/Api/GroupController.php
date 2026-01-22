@@ -13,7 +13,12 @@ class GroupController extends Controller
     // List groups (optionally filtered by trip) with details
     public function index(Request $request, $trip_id = null)
     {
-        $query = GroupTrip::with(['supervisor']);
+        $query = GroupTrip::with([
+            'supervisor',
+            'members' => function ($q) {
+                $q->where('member_status', 'ACTIVE');
+            }
+        ]);
 
         if ($trip_id) {
             $query->where('trip_id', $trip_id);
@@ -374,8 +379,14 @@ class GroupController extends Controller
      */
     public function listPilgrims($id)
     {
-        $group = GroupTrip::with(['trip', 'supervisor', 'members.pilgrim.user'])
-            ->findOrFail($id);
+        $group = GroupTrip::with([
+            'trip',
+            'supervisor',
+            'members' => function ($q) {
+                $q->where('member_status', 'ACTIVE');
+            },
+            'members.pilgrim.user'
+        ])->findOrFail($id);
 
         $user = Auth::user();
         if ($user->role === 'SUPERVISOR' && $group->supervisor_id !== $user->user_id) {
