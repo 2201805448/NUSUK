@@ -124,6 +124,15 @@ if (!$tripId) {
 }
 echo "Trip Created ID: $tripId\n\n";
 
+// 3.5 Create a Group (As Admin) to test against
+echo "3.5 Creating Test Group (Admin)...\n";
+$res = callApi($baseUrl . '/groups', 'POST', ['name' => 'TestGroup-' . $runId, 'trip_id' => $tripId, 'pilgrim_ids' => [$admin->user_id]], $adminToken);
+$groupId = $res['body']['group']['group_id'] ?? null;
+if (!$groupId) {
+    die("Failed to create test group.\n");
+}
+echo "Test Group Created ID: $groupId\n\n";
+
 // 4. Test SUPERVISOR Permissions (Should Fail)
 echo "4. Testing SUPERVISOR Permissions (Expect 403 Forbidden)...\n";
 
@@ -149,6 +158,18 @@ if ($res['code'] === 403) {
     echo "PASSED (403 Forbidden)\n";
 } else {
     echo "FAILED (Got " . $res['code'] . ")\n";
+}
+
+echo "   d) Try Display Mutamir List per Group (Supervisor)... ";
+if ($groupId) {
+    $res = callApi($baseUrl . "/groups/$groupId/pilgrims", 'GET', [], $supToken);
+    if ($res['code'] === 403) {
+        echo "PASSED (403 Forbidden)\n";
+    } else {
+        echo "FAILED (Got " . $res['code'] . ")\n";
+    }
+} else {
+    echo "SKIPPED (No Group ID to test)\n";
 }
 
 echo "\n";
@@ -198,6 +219,15 @@ if ($groupId) {
     } else {
         echo "FAILED (Got " . $res['code'] . ")\n";
     }
+
+    echo "   d) Try Display Mutamir List per Group (Admin)... ";
+    $res = callApi($baseUrl . "/groups/$groupId/pilgrims", 'GET', [], $adminToken);
+    if ($res['code'] === 200) {
+        echo "PASSED (200 OK)\n";
+    } else {
+        echo "FAILED (Got " . $res['code'] . ")\n";
+    }
+
 } else {
     echo "SKIPPED (No Group ID)\n";
 }

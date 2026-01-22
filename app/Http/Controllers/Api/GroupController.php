@@ -377,10 +377,7 @@ class GroupController extends Controller
         $group = GroupTrip::with(['trip', 'supervisor', 'members.pilgrim.user'])
             ->findOrFail($id);
 
-        // Authorization: Admin only
-        // if (Auth::user()->role !== 'ADMIN' && $group->supervisor_id !== Auth::id()) {
-        //     return response()->json(['message' => 'Unauthorized access to this group.'], 403);
-        // }
+
 
         // Format pilgrims list
         $pilgrims = $group->members->map(function ($member) {
