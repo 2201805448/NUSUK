@@ -377,9 +377,10 @@ class GroupController extends Controller
         $group = GroupTrip::with(['trip', 'supervisor', 'members.pilgrim.user'])
             ->findOrFail($id);
 
-
-
-        // Format pilgrims list
+        $user = Auth::user();
+        if ($user->role === 'SUPERVISOR' && $group->supervisor_id !== $user->user_id) {
+            return response()->json(['message' => 'Unauthorized access to this group.'], 403);
+        }        // Format pilgrims list
         $pilgrims = $group->members->map(function ($member) {
             $pilgrim = $member->pilgrim;
             $user = $pilgrim ? $pilgrim->user : null;
@@ -447,9 +448,9 @@ class GroupController extends Controller
         }
 
         // Role-based filtering
-        // if ($user->role === 'SUPERVISOR') {
-        //     $query->where('supervisor_id', $user->user_id);
-        // }
+        if ($user->role === 'SUPERVISOR') {
+            $query->where('supervisor_id', $user->user_id);
+        }
         // Admin sees all groups
 
         $groups = $query->get();
@@ -469,6 +470,7 @@ class GroupController extends Controller
                     'email' => $pilgrimUser->email ?? null,
                     'phone_number' => $pilgrimUser->phone_number ?? null,
                     'passport_name' => $pilgrim->passport_name ?? null,
+                    'passport_number' => $pilgrim->passport_number ?? null,
                     'nationality' => $pilgrim->nationality ?? null,
                     'gender' => $pilgrim->gender ?? null,
                     'group_id' => $group->group_id,

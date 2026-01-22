@@ -111,8 +111,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/pilgrims', [\App\Http\Controllers\Api\PilgrimController::class, 'index']);
 
         // Pilgrims List (for Supervisor viewing their pilgrims) - MOVED TO ADMIN
-        // Route::get('/my-pilgrims', [\App\Http\Controllers\Api\GroupController::class, 'listAllPilgrims']); 
-        // Route::get('/groups/{id}/pilgrims', [\App\Http\Controllers\Api\GroupController::class, 'listPilgrims']);
+        Route::get('/my-pilgrims', [\App\Http\Controllers\Api\GroupController::class, 'listAllPilgrims']);
+        Route::get('/groups/{id}/pilgrims', [\App\Http\Controllers\Api\GroupController::class, 'listPilgrims']);
 
         // View Pilgrim Notes (for Supervisor/Admin)
         Route::get('/pilgrim-notes', [\App\Http\Controllers\Api\PilgrimNoteController::class, 'index']);
@@ -260,9 +260,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/groups/{id}/unassign-supervisor', [\App\Http\Controllers\Api\GroupController::class, 'unassignSupervisor']);
 
         // Listings
-        Route::get('/my-pilgrims', [\App\Http\Controllers\Api\GroupController::class, 'listAllPilgrims']);
-        Route::get('/groups/{id}/pilgrims', [\App\Http\Controllers\Api\GroupController::class, 'listPilgrims']);
-
         // Group Accommodations
         Route::get('/groups/{group_id}/accommodations', [\App\Http\Controllers\Api\GroupAccommodationController::class, 'index']);
         Route::post('/groups/{group_id}/accommodations', [\App\Http\Controllers\Api\GroupAccommodationController::class, 'link']);
