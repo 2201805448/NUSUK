@@ -4847,3 +4847,36 @@ Did you mean one of these?
 #11 C:/Users/admin/Downloads/NUSUK/artisan(16): Illuminate/Foundation/Application->handleCommand(Object(Symfony/Component/Console/Input/ArgvInput))
 #12 {main}
 "} 
+[2026-01-23 01:16:21] local.INFO: RoleMiddleware Check: User ID 47, Role: 'admin', Allowed: supervisor  
+[2026-01-23 01:16:21] local.INFO: RoleMiddleware: Access Denied for admin  
+[2026-01-23 01:16:21] local.INFO: RoleMiddleware Check: User ID 47, Role: 'admin', Allowed: supervisor  
+[2026-01-23 01:16:21] local.INFO: RoleMiddleware: Access Denied for admin  
+[2026-01-23 01:16:21] local.INFO: RoleMiddleware Check: User ID 47, Role: 'admin', Allowed: supervisor  
+[2026-01-23 01:16:21] local.INFO: RoleMiddleware: Access Denied for admin  
+[2026-01-23 01:17:13] local.INFO: === STARTING ATTENDANCE PERMISSION TEST ===  
+[2026-01-23 01:17:13] local.INFO: Testing ADMIN access...  
+[2026-01-23 01:17:13] local.INFO: RoleMiddleware Check: User ID 47, Role: 'admin', Allowed: supervisor  
+[2026-01-23 01:17:13] local.INFO: RoleMiddleware: Access Denied for admin  
+[2026-01-23 01:17:13] local.INFO: Testing PILGRIM access...  
+[2026-01-23 01:17:13] local.INFO: RoleMiddleware Check: User ID 47, Role: 'admin', Allowed: supervisor  
+[2026-01-23 01:17:13] local.INFO: RoleMiddleware: Access Denied for admin  
+[2026-01-23 01:17:13] local.INFO: Testing SUPERVISOR access...  
+[2026-01-23 01:17:13] local.INFO: RoleMiddleware Check: User ID 47, Role: 'admin', Allowed: supervisor  
+[2026-01-23 01:17:13] local.INFO: RoleMiddleware: Access Denied for admin  
+[2026-01-23 01:18:00] local.INFO: === STARTING ATTENDANCE PERMISSION TEST ===  
+[2026-01-23 01:18:00] local.INFO: Testing ADMIN access...  
+[2026-01-23 01:18:00] local.ERROR: Method Illuminate\Foundation\Application::forget does not exist. {"exception":"[object] (BadMethodCallException(code: 0): Method Illuminate\\Foundation\\Application::forget does not exist. at C:/Users/admin/Downloads/NUSUK/vendor/laravel/framework/src/Illuminate/Macroable/Traits/Macroable.php:115)
+[stacktrace]
+#0 C:/Users/admin/Downloads/NUSUK/test_attendance_tracking.php(44): Illuminate/Foundation/Application->__call('forget', Array)
+#1 C:/Users/admin/Downloads/NUSUK/test_attendance_tracking.php(111): makeRequest(Object(Illuminate/Foundation/Application), 'POST', '/api/pilgrims/3...', '21|EyjZa4ZM1sGY...', Array)
+#2 {main}
+"} 
+[2026-01-23 01:18:30] local.INFO: === STARTING ATTENDANCE PERMISSION TEST ===  
+[2026-01-23 01:18:30] local.INFO: Testing ADMIN access...  
+[2026-01-23 01:18:30] local.INFO: RoleMiddleware Check: User ID 47, Role: 'admin', Allowed: supervisor  
+[2026-01-23 01:18:30] local.INFO: RoleMiddleware: Access Denied for admin  
+[2026-01-23 01:18:30] local.INFO: Testing PILGRIM access...  
+[2026-01-23 01:18:30] local.INFO: RoleMiddleware Check: User ID 48, Role: 'pilgrim', Allowed: supervisor  
+[2026-01-23 01:18:30] local.INFO: RoleMiddleware: Access Denied for pilgrim  
+[2026-01-23 01:18:30] local.INFO: Testing SUPERVISOR access...  
+[2026-01-23 01:18:30] local.INFO: RoleMiddleware Check: User ID 46, Role: 'supervisor', Allowed: supervisor  

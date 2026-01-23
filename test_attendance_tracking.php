@@ -14,111 +14,141 @@ use App\Models\Activity;
 use App\Models\AttendanceTracking;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
-// 1. Create Supervisor
-$supervisor = User::where('email', 'supervisor_attendance@example.com')->first();
-if (!$supervisor) {
-    $supervisor = User::create([
-        'full_name' => 'Supervisor Attendance',
-        'email' => 'supervisor_attendance@example.com',
-        'phone_number' => '5554443332',
-        'password' => Hash::make('password'),
-        'role' => 'SUPERVISOR',
-    ]);
+Log::info("=== STARTING ATTENDANCE PERMISSION TEST ===");
+echo "=== Testing Attendance Tracking Permissions ===\n\n";
+
+// --- Helpers ---
+function createTestUser($role, $email)
+{
+    $user = User::where('email', $email)->first();
+    if (!$user) {
+        $user = User::create([
+            'full_name' => "Test $role",
+            'email' => $email,
+            'phone_number' => rand(1000000000, 9999999999),
+            'password' => Hash::make('password'),
+            'role' => $role,
+        ]);
+    }
+    return $user;
 }
-$token = $supervisor->createToken('test-token')->plainTextToken;
 
-// 2. Create Package
+function makeRequest($app, $method, $uri, $token, $data = [])
+{
+    // Clear Auth state to prevent stickiness
+    Auth::forgetGuards();
+    // Also might need to clear the resolved request in the container if it's cached
+    $app->forgetInstance('request');
+
+    $request = Request::create($uri, $method, $data);
+    $request->headers->set('Authorization', 'Bearer ' . $token);
+    $request->headers->set('Accept', 'application/json');
+
+    // Rebind request
+    $app->instance('request', $request);
+
+    return $app->handle($request);
+}
+
+// 1. Setup Data
+echo "1. Setting up test data...\n";
+
+// Users
+$supervisor = createTestUser('SUPERVISOR', 'supervisor_test_attend@example.com');
+$admin = createTestUser('ADMIN', 'admin_test_attend@example.com');
+$pilgrimUser = createTestUser('PILGRIM', 'pilgrim_test_attend@example.com');
+$otherUser = createTestUser('PILGRIM', 'other_test_attend@example.com');
+
+$supervisorToken = $supervisor->createToken('test-sup')->plainTextToken;
+$adminToken = $admin->createToken('test-admin')->plainTextToken;
+$pilgrimToken = $pilgrimUser->createToken('test-pilgrim')->plainTextToken;
+
+// Metadata
 $package = Package::create([
-    'package_name' => 'Test Package Attendance',
-    'price' => 2000,
-    'duration_days' => 5,
+    'package_name' => 'Test Pkg',
+    'price' => 100,
+    'duration_days' => 1,
     'description' => 'Test',
     'is_active' => true
 ]);
 
-// 3. Create Trip
 $trip = Trip::create([
-    'trip_name' => 'Test Trip Attendance',
-    'start_date' => '2025-07-01',
-    'end_date' => '2025-07-06',
-    'price' => 1000,
+    'trip_name' => 'Test Trip',
+    'start_date' => now(),
+    'end_date' => now()->addDays(5),
+    'price' => 100,
     'status' => 'PLANNED',
     'package_id' => $package->package_id
 ]);
 
-// 4. Create Activity
-$activity = Activity::create([
-    'trip_id' => $trip->trip_id,
-    'activity_type' => 'VISIT',
-    'location' => 'Madinah',
-    'activity_date' => '2025-07-02',
-    'activity_time' => '08:00:00',
-    'status' => 'SCHEDULED',
-]);
-
-// 5. Create Pilgrim User & Pilgrim
-$pilgrimUser = User::where('email', 'pilgrim_attend@example.com')->first();
-if (!$pilgrimUser) {
-    $pilgrimUser = User::create([
-        'full_name' => 'Pilgrim MakeAttendance',
-        'email' => 'pilgrim_attend@example.com',
-        'phone_number' => '1110001110',
-        'password' => Hash::make('password'),
-        'role' => 'PILGRIM',
-    ]);
-}
-
 try {
     $pilgrim = Pilgrim::create([
         'user_id' => $pilgrimUser->user_id,
-        'passport_name' => 'Pilgrim Attendance Name',
-        'passport_number' => 'B98765432',
-        'nationality' => 'Egypt',
-        'date_of_birth' => '1985-05-05',
-        'gender' => 'FEMALE'
+        'passport_name' => 'Pilgrim One',
+        'passport_number' => 'P123456',
+        'nationality' => 'Test',
+        'date_of_birth' => '1990-01-01',
+        'gender' => 'MALE'
     ]);
 } catch (\Exception $e) {
-    // If pilgrim exists (due to user_id constraint), fetch it
     $pilgrim = Pilgrim::where('user_id', $pilgrimUser->user_id)->first();
 }
 
-
-// 6. Record Arrival
-echo "Recording ARRIVAL...\n";
-$request = Request::create('/api/pilgrims/' . $pilgrim->pilgrim_id . '/attendance', 'POST', [
+$payload = [
     'trip_id' => $trip->trip_id,
-    'activity_id' => $activity->activity_id,
     'status_type' => 'ARRIVAL',
-    'supervisor_note' => 'Arrived on time.'
-]);
-$request->headers->set('Authorization', 'Bearer ' . $token);
-$request->headers->set('Accept', 'application/json');
+    'supervisor_note' => 'Test Note'
+];
 
-$response = $app->handle($request);
+$url = "/api/pilgrims/{$pilgrim->pilgrim_id}/attendance";
 
-echo "Arrival Response: " . $response->getStatusCode() . "\n";
-echo "Body: " . $response->getContent() . "\n";
+// 2. Test Admin Access (Should Fail - 403)
+echo "\n2. Testing ADMIN access (Expect 403)...\n";
+Log::info("Testing ADMIN access...");
+$response = makeRequest($app, 'POST', $url, $adminToken, $payload);
+echo "Status: " . $response->getStatusCode() . "\n";
+if ($response->getStatusCode() === 403) {
+    echo "PASS: Admin denied.\n";
+} else {
+    echo "FAIL: Admin got " . $response->getStatusCode() . "\n";
+}
 
-// 7. Record Departure
-echo "Recording DEPARTURE...\n";
-$request2 = Request::create('/api/pilgrims/' . $pilgrim->pilgrim_id . '/attendance', 'POST', [
-    'trip_id' => $trip->trip_id,
-    'activity_id' => $activity->activity_id,
-    'status_type' => 'DEPARTURE',
-    'supervisor_note' => 'Left for hotel.'
-]);
-$request2->headers->set('Authorization', 'Bearer ' . $token);
-$request2->headers->set('Accept', 'application/json');
+// 3. Test Pilgrim Access (Should Fail - 403)
+echo "\n3. Testing PILGRIM access (Expect 403)...\n";
+Log::info("Testing PILGRIM access...");
+$response = makeRequest($app, 'POST', $url, $pilgrimToken, $payload);
+echo "Status: " . $response->getStatusCode() . "\n";
+if ($response->getStatusCode() === 403) {
+    echo "PASS: Pilgrim denied.\n";
+} else {
+    echo "FAIL: Pilgrim got " . $response->getStatusCode() . "\n";
+}
 
-$response2 = $app->handle($request2);
+// 4. Test Supervisor Access (Should Succeed - 201)
+echo "\n4. Testing SUPERVISOR access (Expect 201)...\n";
+Log::info("Testing SUPERVISOR access...");
+$response = makeRequest($app, 'POST', $url, $supervisorToken, $payload);
+echo "Status: " . $response->getStatusCode() . "\n";
+if ($response->getStatusCode() === 201) {
+    echo "PASS: Supervisor allowed.\n";
+    echo "Response: " . substr($response->getContent(), 0, 100) . "...\n";
+} else {
+    echo "FAIL: Supervisor got " . $response->getStatusCode() . "\n";
+    echo "Body: " . $response->getContent() . "\n";
+}
 
-echo "Departure Response: " . $response2->getStatusCode() . "\n";
 
 // Cleanup
+echo "\nCleaning up...\n";
 AttendanceTracking::where('pilgrim_id', $pilgrim->pilgrim_id)->delete();
-$pilgrim->delete();
-$pilgrimUser->delete();
-$activity->delete();
-$trip->delete();
-$package->delete();
+if ($pilgrim)
+    $pilgrim->delete();
+if ($package)
+    $package->delete(); // cascading logic might delete trips
+if ($trip)
+    $trip->delete();
+// Users kept for next runs or manual cleanup if needed
+echo "=== Test Complete ===\n";
