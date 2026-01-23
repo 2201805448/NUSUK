@@ -167,8 +167,8 @@ Route::middleware('auth:sanctum')->group(function () {
         // Activity Management (Shared)
         Route::apiResource('activities', \App\Http\Controllers\Api\ActivityController::class);
 
-        // Pilgrim Notes
-        Route::post('/pilgrims/{id}/notes', [\App\Http\Controllers\Api\SupervisorNoteController::class, 'store']);
+        // Pilgrim Notes - MOVED TO ADMIN ONLY
+        // Route::post('/pilgrims/{id}/notes', [\App\Http\Controllers\Api\SupervisorNoteController::class, 'store']);
 
         // Attendance Tracking
         Route::post('/pilgrims/{id}/attendance', [\App\Http\Controllers\Api\AttendanceController::class, 'store']);
@@ -271,5 +271,12 @@ Route::middleware('auth:sanctum')->group(function () {
         // Group Notifications
         Route::post('/groups/{id}/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'sendGroup']);
 
+
+    });
+
+    // Supervisor Only Routes
+    Route::middleware('role:SUPERVISOR')->group(function () {
+        // Supervisor Notes on Pilgrim (Restricted to Supervisor Only)
+        Route::post('/pilgrims/{id}/notes', [\App\Http\Controllers\Api\SupervisorNoteController::class, 'store']);
     });
 });

@@ -4831,3 +4831,19 @@ Did you mean one of these?
 #16 C:/Users/admin/Downloads/NUSUK/tests/verify_group_remove.php(48): Illuminate/Database/Eloquent/Model::__callStatic('create', Array)
 #17 {main}
 "} 
+[2026-01-23 00:59:24] local.ERROR: The "--columns" option does not exist. {"exception":"[object] (Symfony\\Component\\Console\\Exception\\RuntimeException(code: 0): The \"--columns\" option does not exist. at C:/Users/admin/Downloads/NUSUK/vendor/symfony/console/Input/ArgvInput.php:226)
+[stacktrace]
+#0 C:/Users/admin/Downloads/NUSUK/vendor/symfony/console/Input/ArgvInput.php(153): Symfony/Component/Console/Input/ArgvInput->addLongOption('columns', 'method,uri,midd...')
+#1 C:/Users/admin/Downloads/NUSUK/vendor/symfony/console/Input/ArgvInput.php(88): Symfony/Component/Console/Input/ArgvInput->parseLongOption('--columns=metho...')
+#2 C:/Users/admin/Downloads/NUSUK/vendor/symfony/console/Input/ArgvInput.php(77): Symfony/Component/Console/Input/ArgvInput->parseToken('--columns=metho...', true)
+#3 C:/Users/admin/Downloads/NUSUK/vendor/symfony/console/Input/Input.php(53): Symfony/Component/Console/Input/ArgvInput->parse()
+#4 C:/Users/admin/Downloads/NUSUK/vendor/symfony/console/Command/Command.php(295): Symfony/Component/Console/Input/Input->bind(Object(Symfony/Component/Console/Input/InputDefinition))
+#5 C:/Users/admin/Downloads/NUSUK/vendor/laravel/framework/src/Illuminate/Console/Command.php(180): Symfony/Component/Console/Command/Command->run(Object(Symfony/Component/Console/Input/ArgvInput), Object(Illuminate/Console/OutputStyle))
+#6 C:/Users/admin/Downloads/NUSUK/vendor/symfony/console/Application.php(1102): Illuminate/Console/Command->run(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#7 C:/Users/admin/Downloads/NUSUK/vendor/symfony/console/Application.php(356): Symfony/Component/Console/Application->doRunCommand(Object(Illuminate/Foundation/Console/RouteListCommand), Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#8 C:/Users/admin/Downloads/NUSUK/vendor/symfony/console/Application.php(195): Symfony/Component/Console/Application->doRun(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#9 C:/Users/admin/Downloads/NUSUK/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(198): Symfony/Component/Console/Application->run(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#10 C:/Users/admin/Downloads/NUSUK/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1235): Illuminate/Foundation/Console/Kernel->handle(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#11 C:/Users/admin/Downloads/NUSUK/artisan(16): Illuminate/Foundation/Application->handleCommand(Object(Symfony/Component/Console/Input/ArgvInput))
+#12 {main}
+"} 
