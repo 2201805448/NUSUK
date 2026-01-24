@@ -10,6 +10,9 @@ class PilgrimController extends Controller
 {
     public function index()
     {
-        return Pilgrim::with(['latestAttendance'])->get();
+        $pilgrims = Pilgrim::with(['latestAttendance'])->get();
+        return response()->json([
+            'pilgrims' => $pilgrims
+        ]);
     }
 }
