@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PasswordResetController;
+use App\Http\Controllers\Api\AttendanceController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login'])->name('login');
@@ -279,6 +280,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Attendance Tracking (Restricted to Supervisor Only)
         Route::post('/pilgrims/{id}/attendance', [\App\Http\Controllers\Api\AttendanceController::class, 'store']);
+        Route::post('attendance/{pilgrim_id}', [AttendanceController::class, 'store']);
         Route::get('/trips/{id}/attendance-reports', [\App\Http\Controllers\Api\AttendanceController::class, 'getTripReports']);
     });
 });
