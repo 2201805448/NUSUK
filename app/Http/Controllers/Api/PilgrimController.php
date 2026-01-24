@@ -10,6 +10,6 @@ class PilgrimController extends Controller
 {
     public function index()
     {
-        return Pilgrim::all();
+        return Pilgrim::with(['latestAttendance'])->get();
     }
 }

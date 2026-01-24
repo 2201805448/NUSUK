@@ -39,4 +39,9 @@ class Pilgrim extends Model
     {
         return $this->hasMany(RoomAssignment::class, 'pilgrim_id', 'pilgrim_id');
     }
+
+    public function latestAttendance()
+    {
+        return $this->hasOne(AttendanceTracking::class, 'pilgrim_id')->latestOfMany('attendance_id');
+    }
 }
