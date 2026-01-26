@@ -13,7 +13,7 @@ class PilgrimController extends Controller
         $pilgrims = Pilgrim::with(['latestAttendance'])->get();
 
         $pilgrims->each(function ($pilgrim) {
-            $pilgrim->status_type = $pilgrim->latestAttendance ? $pilgrim->latestAttendance->status_type : null;
+            $pilgrim->status_type = $pilgrim->latestAttendance?->status_type;
         });
 
         return response()->json([

@@ -385,7 +385,8 @@ class GroupController extends Controller
             'members' => function ($q) {
                 $q->where('member_status', 'ACTIVE');
             },
-            'members.pilgrim.user'
+            'members.pilgrim.user',
+            'members.pilgrim.latestAttendance'
         ])->findOrFail($id);
 
         $user = Auth::user();
@@ -410,6 +411,7 @@ class GroupController extends Controller
                 'emergency_call' => $pilgrim->emergency_call ?? null,
                 'join_date' => $member->join_date,
                 'member_status' => $member->member_status,
+                'status_type' => $pilgrim->latestAttendance?->status_type,
             ];
         });
 
@@ -451,7 +453,7 @@ class GroupController extends Controller
     {
         $user = Auth::user();
 
-        $query = GroupTrip::with(['trip', 'members.pilgrim.user']);
+        $query = GroupTrip::with(['trip', 'members.pilgrim.user', 'members.pilgrim.latestAttendance']);
 
         // Filter by trip if provided
         if ($request->has('trip_id')) {
@@ -490,6 +492,7 @@ class GroupController extends Controller
                     'trip_name' => $group->trip->trip_name ?? null,
                     'join_date' => $member->join_date,
                     'member_status' => $member->member_status,
+                    'status_type' => $pilgrim->latestAttendance?->status_type,
                 ]);
             }
         }
