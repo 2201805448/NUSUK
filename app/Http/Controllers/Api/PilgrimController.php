@@ -14,6 +14,7 @@ class PilgrimController extends Controller
 
         $pilgrims->each(function ($pilgrim) {
             $pilgrim->status_type = $pilgrim->latestAttendance?->status_type;
+            $pilgrim->supervisor_note = $pilgrim->latestAttendance?->supervisor_note;
         });
 
         return response()->json([
