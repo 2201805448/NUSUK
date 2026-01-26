@@ -11,6 +11,11 @@ class PilgrimController extends Controller
     public function index()
     {
         $pilgrims = Pilgrim::with(['latestAttendance'])->get();
+
+        $pilgrims->each(function ($pilgrim) {
+            $pilgrim->status_type = $pilgrim->latestAttendance ? $pilgrim->latestAttendance->status_type : null;
+        });
+
         return response()->json([
             'pilgrims' => $pilgrims
         ]);
