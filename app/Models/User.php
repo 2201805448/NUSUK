@@ -29,6 +29,7 @@ class User extends Authenticatable
         'gender',
         'date_of_birth',
         'emergency_call',
+        'fcm_token',
     ];
 
     // لأن جدولك فيه created_at و updated_at

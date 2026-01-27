@@ -44,6 +44,7 @@ class AuthController extends Controller
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
+            'fcm_token' => 'nullable|string',
         ]);
 
         if (!Auth::attempt($request->only('email', 'password'))) {
@@ -53,6 +54,12 @@ class AuthController extends Controller
         }
 
         $user = User::where('email', $request->email)->firstOrFail();
+
+        // Update FCM Token if provided because user might be logging in from a new device
+        if ($request->filled('fcm_token')) {
+            $user->update(['fcm_token' => $request->fcm_token]);
+        }
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         // Normalize role to proper title case for frontend consistency

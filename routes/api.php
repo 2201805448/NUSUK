@@ -175,6 +175,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Notifications
         Route::post('/notifications/general', [\App\Http\Controllers\Api\NotificationController::class, 'sendGeneral']);
+        Route::post('/notifications/broadcast', [\App\Http\Controllers\Api\NotificationController::class, 'sendGeneral']);
+        Route::post('/notifications/user/{id}', [\App\Http\Controllers\Api\NotificationController::class, 'sendToUser']);
         Route::post('/trips/{id}/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'sendTrip']);
         // Route::post('/groups/{id}/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'sendGroup']); // MOVED TO ADMIN
 

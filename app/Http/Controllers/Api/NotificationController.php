@@ -51,7 +51,40 @@ class NotificationController extends Controller
             Notification::insert($chunk);
         }
 
+        // Send FCM Notifications
+        $this->sendFcmToUsers($users, $request->title, $request->message);
+
         return response()->json(['message' => 'General notification sent to ' . count($users) . ' users.']);
+    }
+
+    /**
+     * Send a notification to a specific user.
+     */
+    public function sendToUser(Request $request, $user_id)
+    {
+        // Supervisor or Admin
+        
+        $request->validate([
+            'title' => 'required|string|max:100',
+            'message' => 'required|string',
+        ]);
+
+        $user = User::findOrFail($user_id);
+
+        $notification = [
+            'user_id' => $user->user_id,
+            'title' => $request->title,
+            'message' => $request->message,
+            'is_read' => false,
+            'created_at' => now(),
+        ];
+
+        Notification::insert($notification);
+
+        // Send FCM
+        $this->sendFcmToUsers([$user->user_id], $request->title, $request->message);
+
+        return response()->json(['message' => 'Notification sent to user.']);
     }
 
     /**
@@ -100,6 +133,9 @@ class NotificationController extends Controller
 
         Notification::insert($notifications);
 
+        // Send FCM
+        $this->sendFcmToUsers($userIds, $request->title, $request->message);
+
         return response()->json(['message' => 'Notification sent to ' . count($userIds) . ' users in the trip.']);
     }
 
@@ -143,7 +179,45 @@ class NotificationController extends Controller
 
         Notification::insert($notifications);
 
+        // Send FCM
+        $this->sendFcmToUsers($userIds, $request->title, $request->message);
+
         return response()->json(['message' => 'Notification sent to ' . count($userIds) . ' users in the group.']);
+    }
+
+    /**
+     * Helper to send FCM notifications
+     */
+    private function sendFcmToUsers($userIds, $title, $body)
+    {
+        try {
+            $tokens = User::whereIn('user_id', $userIds)
+                ->whereNotNull('fcm_token')
+                ->pluck('fcm_token')
+                ->all();
+
+            if (empty($tokens)) {
+                return;
+            }
+
+            $messaging = app('firebase.messaging');
+
+            $message = \Kreait\Firebase\Messaging\CloudMessage::new()
+                ->withNotification(\Kreait\Firebase\Messaging\Notification::create($title, $body));
+
+            // Per documentation, multicast is for sending same message to multiple tokens
+            // $messaging->sendMulticast($message, $tokens);
+            // Verify library version support. sendMulticast is standard.
+
+            $report = $messaging->sendMulticast($message, $tokens);
+
+            // Log successes/failures if needed
+            // Log::info('FCM Sent: ' . $report->successes()->count() . ' Success, ' . $report->failures()->count() . ' Failures');
+
+        } catch (\Throwable $e) {
+            // Log error but don't fail request
+            // Log::error('FCM Error: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -189,7 +263,7 @@ class NotificationController extends Controller
 
     private function authorizeAdmin()
     {
-        if (Auth::user()->role !== 'ADMIN') {
+        if (strtoupper(Auth::user()->role) !== 'ADMIN') {
             abort(403, 'Unauthorized. Admins only.');
         }
     }
