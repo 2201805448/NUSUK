@@ -253,4 +253,34 @@ class BookingController extends Controller
             'modification' => $modification
         ], 201);
     }
+
+    /**
+     * Approve a booking.
+     */
+    public function approve($id)
+    {
+        $booking = Booking::findOrFail($id);
+        $booking->status = 'CONFIRMED';
+        $booking->save();
+
+        return response()->json([
+            'message' => 'Booking approved successfully',
+            'booking' => $booking
+        ]);
+    }
+
+    /**
+     * Reject a booking.
+     */
+    public function reject($id)
+    {
+        $booking = Booking::findOrFail($id);
+        $booking->status = 'REJECTED';
+        $booking->save();
+
+        return response()->json([
+            'message' => 'Booking rejected successfully',
+            'booking' => $booking
+        ]);
+    }
 }

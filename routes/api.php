@@ -236,6 +236,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/trips/{id}/transports', [\App\Http\Controllers\Api\TripController::class, 'addTransport']); // Added for stages
         // Route::apiResource('activities', \App\Http\Controllers\Api\ActivityController::class); // Moved to shared group
         // Booking Review & Approval
+        Route::post('bookings/{id}/approve', [\App\Http\Controllers\Api\BookingController::class, 'approve']);
+        Route::post('bookings/{id}/reject', [\App\Http\Controllers\Api\BookingController::class, 'reject']);
         Route::get('/bookings', [\App\Http\Controllers\Api\AdminBookingController::class, 'index']);
         Route::get('/bookings/{id}', [\App\Http\Controllers\Api\AdminBookingController::class, 'show']);
         Route::put('/bookings/{id}/status', [\App\Http\Controllers\Api\AdminBookingController::class, 'updateStatus']);
