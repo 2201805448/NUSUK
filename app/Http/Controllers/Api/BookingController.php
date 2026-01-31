@@ -20,7 +20,7 @@ class BookingController extends Controller
         $user = Auth::user();
 
         $query = Booking::where('user_id', $user->user_id)
-            ->with(['package', 'trip']);
+            ->with(['package', 'trip', 'user']);
 
         // Optional: Filter by status
         if ($request->has('status')) {
@@ -49,6 +49,7 @@ class BookingController extends Controller
                 'status' => $booking->status,
                 'total_price' => $booking->total_price,
                 'pay_method' => $booking->pay_method,
+                'user_name' => $booking->user->name ?? null,
                 'package' => $booking->package ? [
                     'package_id' => $booking->package->package_id,
                     'package_name' => $booking->package->package_name ?? null,
