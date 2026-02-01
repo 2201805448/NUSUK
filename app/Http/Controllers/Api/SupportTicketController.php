@@ -23,14 +23,14 @@ class SupportTicketController extends Controller
         $role = strtoupper($user->role);
 
         if (in_array($role, ['SUPPORT', 'ADMIN'])) {
-            $tickets = Ticket::with(['user:user_id,full_name,role', 'logs'])
+            $tickets = Ticket::with(['user:user_id,full_name,role', 'logs', 'trip'])
                 ->withCount('logs')
                 ->orderBy('created_at', 'desc')
                 ->get();
         } else {
             // Regular user sees only their own tickets
             $tickets = Ticket::where('user_id', $user->user_id)
-                ->with(['user:user_id,full_name,role', 'logs'])
+                ->with(['user:user_id,full_name,role', 'logs', 'trip'])
                 ->withCount('logs')
                 ->orderBy('created_at', 'desc')
                 ->get();
@@ -55,7 +55,7 @@ class SupportTicketController extends Controller
         $ticket = Ticket::create([
             'user_id' => Auth::id(),
             'title' => $request->title,
-            'trip_id' => $request->input('trip_id'),
+            'trip_id' => $request->trip_id,
             'priority' => $request->input('priority', 'LOW'), // Default to LOW if null
             'status' => 'OPEN',
         ]);
