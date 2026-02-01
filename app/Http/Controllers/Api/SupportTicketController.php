@@ -79,8 +79,9 @@ class SupportTicketController extends Controller
         $ticket = Ticket::with(['logs.actionBy:user_id,full_name,role'])
             ->findOrFail($id);
 
-        // Security check: only owner or Admin can view
-        if (Auth::user()->role !== 'ADMIN' && $ticket->user_id !== Auth::id()) {
+        // Security check: only owner, Admin, or Support can view
+        $userRole = strtoupper(Auth::user()->role);
+        if (!in_array($userRole, ['ADMIN', 'SUPPORT']) && $ticket->user_id !== Auth::id()) {
             return response()->json(['message' => 'Unauthorized access to this ticket.'], 403);
         }
 
@@ -94,7 +95,8 @@ class SupportTicketController extends Controller
     {
         $ticket = Ticket::findOrFail($id);
 
-        if (Auth::user()->role !== 'ADMIN' && $ticket->user_id !== Auth::id()) {
+        $userRole = strtoupper(Auth::user()->role);
+        if (!in_array($userRole, ['ADMIN', 'SUPPORT']) && $ticket->user_id !== Auth::id()) {
             return response()->json(['message' => 'Unauthorized access to this ticket.'], 403);
         }
 
