@@ -20,8 +20,8 @@ class GuideController extends Controller
             $query->where('category', $request->category);
         }
 
-        $content = $query->orderBy('created_at', 'desc')->paginate(20);
-
+        $content = $query->orderBy('created_at', 'desc')->get();
+        // Return empty array if empty (Collection behaves this way)
         return response()->json($content);
     }
 

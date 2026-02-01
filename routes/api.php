@@ -54,10 +54,21 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/announcements/{id}', [\App\Http\Controllers\Api\AnnouncementController::class, 'show']);
     Route::delete('/announcements/{id}', [\App\Http\Controllers\Api\AnnouncementController::class, 'destroy']);
 
-    // Religious Content (Guides & Prayer Times)
+    // Religious Content (Guides & Prayer Times) - Moved to Public/Shared or keep here?
+    // User requested "unreachable", implying maybe they want it public OR just standard paths.
+    // I will add /ads alias here for now, but also consider moving them out if they are truly public.
+    // However, Dashboard usually requires auth.
+    // Let's add the alias first.
+    Route::get('/ads', [\App\Http\Controllers\Api\AnnouncementController::class, 'index']); // Alias for /announcements
+
     Route::get('/guides', [\App\Http\Controllers\Api\GuideController::class, 'index']);
     Route::get('/guides/{id}', [\App\Http\Controllers\Api\GuideController::class, 'show']);
-    Route::post('/guides', [\App\Http\Controllers\Api\GuideController::class, 'store']); // Admin create
+    Route::post('/guides', [\App\Http\Controllers\Api\GuideController::class, 'store']); // Admin create - THIS SHOULD PROBABLY BE PROTECTED or in Admin group.
+
+    // Moving public read-only access to top if needed?
+    // The user said "404 Errors: Paths like /ads and religious data endpoints".
+    // 404 means Route Not Found.
+    // Ensure '/prayer-times' is defined.
     Route::get('/prayer-times', [\App\Http\Controllers\Api\PrayerTimeController::class, 'index']);
 
     // Support Tickets
