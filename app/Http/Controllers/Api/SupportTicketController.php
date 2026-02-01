@@ -19,13 +19,20 @@ class SupportTicketController extends Controller
     {
         $user = Auth::user();
 
-        // استخدام getAttribute لضمان الوصول للمعرف حتى لو كان protected
-        $userId = $user->getAttribute('user_id');
+        // Check if user is Support or Admin (Case insensitive)
+        $role = strtoupper($user->role);
 
-        $tickets = Ticket::where('user_id', $userId)
-            ->with('logs')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        if (in_array($role, ['SUPPORT', 'ADMIN'])) {
+            $tickets = Ticket::with(['user:user_id,full_name,role', 'logs'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+        } else {
+            // Regular user sees only their own tickets
+            $tickets = Ticket::where('user_id', $user->user_id)
+                ->with(['user:user_id,full_name,role', 'logs'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+        }
 
         return response()->json($tickets);
     }
