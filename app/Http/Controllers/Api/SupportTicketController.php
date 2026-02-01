@@ -24,12 +24,14 @@ class SupportTicketController extends Controller
 
         if (in_array($role, ['SUPPORT', 'ADMIN'])) {
             $tickets = Ticket::with(['user:user_id,full_name,role', 'logs'])
+                ->withCount('logs')
                 ->orderBy('created_at', 'desc')
                 ->get();
         } else {
             // Regular user sees only their own tickets
             $tickets = Ticket::where('user_id', $user->user_id)
                 ->with(['user:user_id,full_name,role', 'logs'])
+                ->withCount('logs')
                 ->orderBy('created_at', 'desc')
                 ->get();
         }
@@ -112,6 +114,11 @@ class SupportTicketController extends Controller
 
         // Notify User if reply is from someone else
         if ($ticket->user_id !== Auth::id()) {
+            // If replied by Support/Admin, change status to PENDING
+            if (in_array($userRole, ['ADMIN', 'SUPPORT'])) {
+                $ticket->update(['status' => 'PENDING']);
+            }
+
             try {
                 Notification::create([
                     'user_id' => $ticket->user_id,
@@ -196,6 +203,35 @@ class SupportTicketController extends Controller
             'message' => 'Ticket closed successfully',
             'ticket' => $ticket,
             'log' => $log
+        ]);
+    }
+    /**
+     * Updates the status of a ticket manually.
+     */
+    public function updateStatus(Request $request, $id)
+    {
+        $userRole = strtoupper(Auth::user()->role);
+        if (!in_array($userRole, ['ADMIN', 'SUPPORT'])) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $request->validate([
+            'status' => 'required|string|in:OPEN,PENDING,RESOLVED,CLOSED'
+        ]);
+
+        $ticket = Ticket::findOrFail($id);
+        $oldStatus = $ticket->status;
+        $ticket->update(['status' => $request->status]);
+
+        TicketLog::create([
+            'ticket_id' => $ticket->ticket_id,
+            'action_by' => Auth::id(),
+            'action_note' => "Status changed from $oldStatus to " . $request->status,
+        ]);
+
+        return response()->json([
+            'message' => 'Ticket status updated successfully',
+            'ticket' => $ticket
         ]);
     }
 }
