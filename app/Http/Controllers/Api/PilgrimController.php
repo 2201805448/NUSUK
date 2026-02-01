@@ -10,7 +10,7 @@ class PilgrimController extends Controller
 {
     public function index()
     {
-        $pilgrims = Pilgrim::with(['latestAttendance'])->get();
+        $pilgrims = Pilgrim::with(['latestAttendance', 'user'])->get();
 
         $pilgrims->each(function ($pilgrim) {
             $pilgrim->status_type = $pilgrim->latestAttendance?->status_type;
