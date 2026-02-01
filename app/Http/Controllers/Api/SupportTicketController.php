@@ -45,16 +45,16 @@ class SupportTicketController extends Controller
         $request->validate([
             'title' => 'required|string|max:150',
             'description' => 'required|string',
-            'trip_id' => 'nullable|exists:trips,trip_id',
-            'priority' => 'in:LOW,MEDIUM,HIGH',
+            'trip_id' => 'nullable|integer|exists:trips,trip_id',
+            'priority' => 'nullable|string|in:LOW,MEDIUM,HIGH',
         ]);
 
         // Create Ticket
         $ticket = Ticket::create([
             'user_id' => Auth::id(),
             'title' => $request->title,
-            'trip_id' => $request->trip_id,
-            'priority' => $request->priority ?? 'LOW',
+            'trip_id' => $request->input('trip_id'),
+            'priority' => $request->input('priority', 'LOW'), // Default to LOW if null
             'status' => 'OPEN',
         ]);
 
