@@ -114,9 +114,9 @@ class SupportTicketController extends Controller
 
         // Notify User if reply is from someone else
         if ($ticket->user_id !== Auth::id()) {
-            // If replied by Support/Admin, change status to PENDING
+            // If replied by Support/Admin, change status to IN_PROGRESS
             if (in_array($userRole, ['ADMIN', 'SUPPORT'])) {
-                $ticket->update(['status' => 'PENDING']);
+                $ticket->update(['status' => 'IN_PROGRESS']);
             }
 
             try {
@@ -216,7 +216,7 @@ class SupportTicketController extends Controller
         }
 
         $request->validate([
-            'status' => 'required|string|in:OPEN,PENDING,RESOLVED,CLOSED'
+            'status' => 'required|string|in:OPEN,IN_PROGRESS,CLOSED'
         ]);
 
         $ticket = Ticket::findOrFail($id);

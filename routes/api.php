@@ -61,14 +61,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/prayer-times', [\App\Http\Controllers\Api\PrayerTimeController::class, 'index']);
 
     // Support Tickets
-    Route::get('/support/tickets', [\App\Http\Controllers\Api\SupportTicketController::class, 'index']);
-    Route::post('/support/tickets', [\App\Http\Controllers\Api\SupportTicketController::class, 'store']);
-    Route::get('/support/tickets/{id}', [\App\Http\Controllers\Api\SupportTicketController::class, 'show']);
-    Route::post('/support/tickets/{id}/reply', [\App\Http\Controllers\Api\SupportTicketController::class, 'reply']);
-    Route::post('/support/tickets/{id}/replies', [\App\Http\Controllers\Api\SupportTicketController::class, 'reply']); // Alias for frontend compatibility
-    Route::put('/support/tickets/{id}/status', [\App\Http\Controllers\Api\SupportTicketController::class, 'updateStatus']);
-    Route::post('/support/tickets/{id}/transfer', [\App\Http\Controllers\Api\SupportTicketController::class, 'transfer']);
-    Route::post('/support/tickets/{id}/close', [\App\Http\Controllers\Api\SupportTicketController::class, 'close']);
+    // Support Tickets
+    Route::middleware('block_role:MANAGER,SUPERVISOR')->group(function () {
+        Route::get('/support/tickets', [\App\Http\Controllers\Api\SupportTicketController::class, 'index']);
+        Route::post('/support/tickets', [\App\Http\Controllers\Api\SupportTicketController::class, 'store']);
+        Route::get('/support/tickets/{id}', [\App\Http\Controllers\Api\SupportTicketController::class, 'show']);
+        Route::post('/support/tickets/{id}/reply', [\App\Http\Controllers\Api\SupportTicketController::class, 'reply']);
+        Route::post('/support/tickets/{id}/replies', [\App\Http\Controllers\Api\SupportTicketController::class, 'reply']); // Alias for frontend compatibility
+        Route::put('/support/tickets/{id}/status', [\App\Http\Controllers\Api\SupportTicketController::class, 'updateStatus']);
+        Route::post('/support/tickets/{id}/transfer', [\App\Http\Controllers\Api\SupportTicketController::class, 'transfer']);
+        Route::post('/support/tickets/{id}/close', [\App\Http\Controllers\Api\SupportTicketController::class, 'close']);
+    });
 
     // Bookings
     Route::get('/my-bookings', [\App\Http\Controllers\Api\BookingController::class, 'myBookings']);
