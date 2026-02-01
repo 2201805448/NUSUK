@@ -65,6 +65,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/support/tickets', [\App\Http\Controllers\Api\SupportTicketController::class, 'store']);
     Route::get('/support/tickets/{id}', [\App\Http\Controllers\Api\SupportTicketController::class, 'show']);
     Route::post('/support/tickets/{id}/reply', [\App\Http\Controllers\Api\SupportTicketController::class, 'reply']);
+    Route::post('/support/tickets/{id}/replies', [\App\Http\Controllers\Api\SupportTicketController::class, 'reply']); // Alias for frontend compatibility
     Route::post('/support/tickets/{id}/transfer', [\App\Http\Controllers\Api\SupportTicketController::class, 'transfer']);
     Route::post('/support/tickets/{id}/close', [\App\Http\Controllers\Api\SupportTicketController::class, 'close']);
 
