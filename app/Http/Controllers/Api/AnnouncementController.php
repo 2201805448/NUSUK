@@ -43,7 +43,8 @@ class AnnouncementController extends Controller
             'title' => 'required|string|max:150',
             'content' => 'required|string',
             'expiry_date' => 'nullable|date',
-            'image_url' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // Max 5MB
+            'image_url' => 'nullable|string', // Fallback for direct URL input
             'type' => 'in:GENERAL,PACKAGE,TRIP,OFFER',
             'priority' => 'in:NORMAL,HIGH,URGENT',
             'start_date' => 'nullable|date',
@@ -71,10 +72,19 @@ class AnnouncementController extends Controller
             }
         }
 
+        // Handle image upload
+        $imageUrl = $request->input('image_url'); // Default to provided URL
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+            $path = $image->storeAs('announcements', $filename, 'public');
+            $imageUrl = asset('storage/' . $path);
+        }
+
         $announcement = Announcement::create([
             'title' => $request->input('title'),
             'content' => $request->input('content'),
-            'image_url' => $request->input('image_url'),
+            'image_url' => $imageUrl,
             'expiry_date' => $request->input('expiry_date'),
             'is_active' => true,
             'created_at' => now(),
@@ -107,7 +117,8 @@ class AnnouncementController extends Controller
             'title' => 'nullable|string|max:150',
             'content' => 'nullable|string',
             'expiry_date' => 'nullable|date',
-            'image_url' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // Max 5MB
+            'image_url' => 'nullable|string', // Fallback for direct URL input
             'type' => 'in:GENERAL,PACKAGE,TRIP,OFFER',
             'priority' => 'in:NORMAL,HIGH,URGENT',
             'start_date' => 'nullable|date',
@@ -139,10 +150,27 @@ class AnnouncementController extends Controller
             }
         }
 
+        // Handle image upload
+        $imageUrl = $announcement->image_url; // Keep existing by default
+        if ($request->hasFile('image')) {
+            // Delete old image if it exists and is stored locally
+            if ($announcement->image_url && str_contains($announcement->image_url, '/storage/announcements/')) {
+                $oldPath = str_replace(asset('storage/'), '', $announcement->image_url);
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($oldPath);
+            }
+
+            $image = $request->file('image');
+            $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+            $path = $image->storeAs('announcements', $filename, 'public');
+            $imageUrl = asset('storage/' . $path);
+        } elseif ($request->has('image_url')) {
+            $imageUrl = $request->input('image_url');
+        }
+
         $announcement->update([
             'title' => $request->input('title', $announcement->title),
             'content' => $request->input('content', $announcement->content),
-            'image_url' => $request->input('image_url', $announcement->image_url),
+            'image_url' => $imageUrl,
             'expiry_date' => $request->input('expiry_date', $announcement->expiry_date),
             'is_active' => $request->input('is_active', $announcement->is_active),
             'type' => $type,
