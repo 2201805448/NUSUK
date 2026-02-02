@@ -47,12 +47,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::put('/notifications/{id}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
 
-    // Advertisements / Announcements
+    // Advertisements / Announcements (READ-ONLY for all authenticated users)
     Route::get('/announcements', [\App\Http\Controllers\Api\AnnouncementController::class, 'index']);
-    Route::post('/announcements', [\App\Http\Controllers\Api\AnnouncementController::class, 'store']);
-    Route::put('/announcements/{id}', [\App\Http\Controllers\Api\AnnouncementController::class, 'update']);
     Route::get('/announcements/{id}', [\App\Http\Controllers\Api\AnnouncementController::class, 'show']);
-    Route::delete('/announcements/{id}', [\App\Http\Controllers\Api\AnnouncementController::class, 'destroy']);
 
     // Religious Content (Guides & Prayer Times) - Moved to Public/Shared or keep here?
     // User requested "unreachable", implying maybe they want it public OR just standard paths.
@@ -289,6 +286,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Group Notifications
         Route::post('/groups/{id}/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'sendGroup']);
+
+        // Announcements Management (ADMIN only: Create, Update, Delete)
+        Route::post('/announcements', [\App\Http\Controllers\Api\AnnouncementController::class, 'store']);
+        Route::put('/announcements/{id}', [\App\Http\Controllers\Api\AnnouncementController::class, 'update']);
+        Route::delete('/announcements/{id}', [\App\Http\Controllers\Api\AnnouncementController::class, 'destroy']);
 
 
     });
