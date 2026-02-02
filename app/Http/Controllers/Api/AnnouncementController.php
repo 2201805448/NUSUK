@@ -10,6 +10,33 @@ use Illuminate\Support\Facades\Auth;
 class AnnouncementController extends Controller
 {
     /**
+     * Convert a relative storage path to an absolute URL.
+     * Handles both already-absolute URLs and relative paths.
+     */
+    private function getAbsoluteImageUrl($imageUrl)
+    {
+        if (empty($imageUrl)) {
+            return null;
+        }
+
+        // If it's already an absolute URL, return as-is
+        if (filter_var($imageUrl, FILTER_VALIDATE_URL)) {
+            return $imageUrl;
+        }
+
+        // If it starts with 'storage/' or 'announcements/', convert to absolute URL
+        if (str_starts_with($imageUrl, 'storage/')) {
+            return url($imageUrl);
+        }
+
+        if (str_starts_with($imageUrl, 'announcements/')) {
+            return url('storage/' . $imageUrl);
+        }
+
+        // For other relative paths, try to build URL
+        return url('storage/' . $imageUrl);
+    }
+    /**
      * Display a listing of active announcements/advertisements.
      */
     public function index()
@@ -29,7 +56,7 @@ class AnnouncementController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // Sanitize image_url - remove placeholder URLs
+        // Sanitize image_url - remove placeholder URLs and convert to absolute URLs
         $blockedPatterns = ['via.placeholder.com', 'placeholder.com', 'google.com/search', 'file:///'];
         $announcements->transform(function ($announcement) use ($blockedPatterns) {
             if ($announcement->image_url) {
@@ -40,6 +67,8 @@ class AnnouncementController extends Controller
                     }
                 }
             }
+            // Convert to absolute URL
+            $announcement->image_url = $this->getAbsoluteImageUrl($announcement->image_url);
             return $announcement;
         });
 
@@ -275,7 +304,7 @@ class AnnouncementController extends Controller
             return response()->json(['message' => 'Announcement not found.'], 404);
         }
 
-        // Sanitize image_url - remove placeholder URLs
+        // Sanitize image_url - remove placeholder URLs and convert to absolute URL
         $blockedPatterns = ['via.placeholder.com', 'placeholder.com', 'google.com/search', 'file:///'];
         if ($announcement->image_url) {
             foreach ($blockedPatterns as $pattern) {
@@ -285,6 +314,8 @@ class AnnouncementController extends Controller
                 }
             }
         }
+        // Convert to absolute URL
+        $announcement->image_url = $this->getAbsoluteImageUrl($announcement->image_url);
 
         // Fetch related data if applicable
         $relatedData = null;
