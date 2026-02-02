@@ -22,5 +22,6 @@ class Announcement extends Model
         'related_id',
         'priority',
         'start_date',
+        'created_at',
     ];
 }

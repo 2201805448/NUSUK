@@ -88,13 +88,32 @@ class AnnouncementController extends Controller
 
         // Handle image upload
         $imageUrl = null; // Default to null, not placeholder
+        $uploadDebug = [
+            'hasFile' => $request->hasFile('image'),
+            'allFiles' => array_keys($request->allFiles()),
+        ];
 
         if ($request->hasFile('image')) {
-            // File upload takes priority
             $image = $request->file('image');
-            $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-            $path = $image->storeAs('announcements', $filename, 'public');
-            $imageUrl = url('storage/' . $path);
+
+            if ($image->isValid()) {
+                $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+                $path = $image->storeAs('announcements', $filename, 'public');
+
+                if ($path) {
+                    // Use asset() helper for URL generation - more reliable for local storage
+                    $imageUrl = asset('storage/' . $path);
+                    $uploadDebug['uploadSuccess'] = true;
+                    $uploadDebug['path'] = $path;
+                    $uploadDebug['url'] = $imageUrl;
+                } else {
+                    $uploadDebug['uploadSuccess'] = false;
+                    $uploadDebug['error'] = 'Failed to store file';
+                }
+            } else {
+                $uploadDebug['uploadSuccess'] = false;
+                $uploadDebug['error'] = 'Invalid file upload';
+            }
         } elseif ($request->has('image_url') && $request->input('image_url')) {
             $providedUrl = $request->input('image_url');
             // Reject placeholder URLs
@@ -127,7 +146,8 @@ class AnnouncementController extends Controller
 
         return response()->json([
             'message' => 'Announcement created successfully',
-            'data' => $announcement
+            'data' => $announcement,
+            'upload_debug' => $uploadDebug // Temporary debug info
         ], 201);
     }
 
@@ -198,14 +218,18 @@ class AnnouncementController extends Controller
         if ($request->hasFile('image')) {
             // Delete old image if it exists and is stored locally
             if ($announcement->image_url && str_contains($announcement->image_url, '/storage/announcements/')) {
-                $oldPath = str_replace(url('storage/'), '', $announcement->image_url);
+                $oldPath = str_replace(asset('storage/'), '', $announcement->image_url);
                 \Illuminate\Support\Facades\Storage::disk('public')->delete($oldPath);
             }
 
             $image = $request->file('image');
-            $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-            $path = $image->storeAs('announcements', $filename, 'public');
-            $imageUrl = url('storage/' . $path);
+            if ($image->isValid()) {
+                $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+                $path = $image->storeAs('announcements', $filename, 'public');
+                if ($path) {
+                    $imageUrl = asset('storage/' . $path);
+                }
+            }
         } elseif ($request->has('image_url') && $request->input('image_url')) {
             $providedUrl = $request->input('image_url');
             // Reject placeholder URLs
