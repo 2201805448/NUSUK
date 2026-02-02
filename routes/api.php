@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PasswordResetController;
 use App\Http\Controllers\Api\AttendanceController;
+use App\Http\Controllers\Api\AdminReportController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login'])->name('login');
@@ -208,6 +209,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:ADMIN')->group(function () {
         Route::get('/stats', [\App\Http\Controllers\Api\AdminController::class, 'stats']);
         Route::get('/general-stats', [\App\Http\Controllers\Api\AdminController::class, 'generalStats']);
+        Route::get('/admin/stats', [AdminReportController::class, 'getStats']); // Dashboard report stats
         Route::get('/users', [\App\Http\Controllers\Api\AdminController::class, 'users']);
         Route::post('/users', [\App\Http\Controllers\Api\AdminController::class, 'store']);
         Route::get('/users/{id}', [\App\Http\Controllers\Api\AdminController::class, 'show']);
