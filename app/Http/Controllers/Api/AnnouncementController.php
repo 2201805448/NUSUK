@@ -37,9 +37,7 @@ class AnnouncementController extends Controller
      */
     public function store(Request $request)
     {
-        if (Auth::user()->role !== 'ADMIN') {
-            abort(403, 'Unauthorized. Admins only.');
-        }
+        // Authorization is handled by the 'role:ADMIN' middleware in api.php
 
         $request->validate([
             'title' => 'required|string|max:150',
@@ -97,9 +95,7 @@ class AnnouncementController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if (Auth::user()->role !== 'ADMIN') {
-            abort(403, 'Unauthorized. Admins only.');
-        }
+        // Authorization is handled by the 'role:ADMIN' middleware in api.php
 
         $announcement = Announcement::find($id);
 
@@ -192,9 +188,7 @@ class AnnouncementController extends Controller
      */
     public function destroy($id)
     {
-        if (Auth::user()->role !== 'ADMIN') {
-            abort(403, 'Unauthorized. Admins only.');
-        }
+        // Authorization is handled by the 'role:ADMIN' middleware in api.php
 
         $announcement = Announcement::find($id);
 
