@@ -10,8 +10,28 @@ use App\Models\Booking;
 class ProfileController extends Controller
 {
     /**
+     * Convert a relative storage path to an absolute URL.
+     * Handles both already-absolute URLs and relative paths.
+     */
+    private function getAbsoluteImageUrl($imagePath)
+    {
+        if (empty($imagePath)) {
+            return null;
+        }
+
+        // If it's already an absolute URL, return as-is
+        if (filter_var($imagePath, FILTER_VALIDATE_URL)) {
+            return $imagePath;
+        }
+
+        // Convert relative path to absolute URL
+        return url('storage/' . $imagePath);
+    }
+
+    /**
      * Get the authenticated User's profile.
      * Includes basic info, pilgrim details (if any), and recent bookings (services).
+     * Returns a FLATTENED response where pilgrim fields are merged into the user object.
      */
     public function me(Request $request)
     {
@@ -28,8 +48,43 @@ class ProfileController extends Controller
             ->take(5)
             ->get();
 
+        // 3. Flatten the response - merge pilgrim data into user object
+        $userData = $user->toArray();
+
+        // Remove nested pilgrim object and flatten its properties into user
+        if (isset($userData['pilgrim']) && is_array($userData['pilgrim'])) {
+            $pilgrimData = $userData['pilgrim'];
+            unset($userData['pilgrim']);
+
+            // Merge pilgrim fields directly into user data
+            $userData['pilgrim_id'] = $pilgrimData['pilgrim_id'] ?? null;
+            $userData['passport_name'] = $pilgrimData['passport_name'] ?? null;
+            $userData['passport_number'] = $pilgrimData['passport_number'] ?? null;
+            $userData['nationality'] = $pilgrimData['nationality'] ?? null;
+            $userData['date_of_birth'] = $pilgrimData['date_of_birth'] ?? null;
+            $userData['gender'] = $pilgrimData['gender'] ?? null;
+            $userData['emergency_call'] = $pilgrimData['emergency_call'] ?? null;
+            $userData['notes'] = $pilgrimData['notes'] ?? null;
+
+            // Convert image paths to absolute URLs
+            $userData['passport_img'] = $this->getAbsoluteImageUrl($pilgrimData['passport_img'] ?? null);
+            $userData['visa_img'] = $this->getAbsoluteImageUrl($pilgrimData['visa_img'] ?? null);
+        } else {
+            // No pilgrim data - set all pilgrim fields to null
+            $userData['pilgrim_id'] = null;
+            $userData['passport_name'] = null;
+            $userData['passport_number'] = null;
+            $userData['nationality'] = null;
+            $userData['date_of_birth'] = null;
+            $userData['gender'] = null;
+            $userData['emergency_call'] = null;
+            $userData['notes'] = null;
+            $userData['passport_img'] = null;
+            $userData['visa_img'] = null;
+        }
+
         return response()->json([
-            'user' => $user,
+            'user' => $userData,
             'services_history' => $recentBookings
         ]);
     }
@@ -103,9 +158,44 @@ class ProfileController extends Controller
         // Reload pilgrim relationship to return complete object
         $user->load('pilgrim');
 
+        // Flatten the response - merge pilgrim data into user object
+        $userData = $user->toArray();
+
+        // Remove nested pilgrim object and flatten its properties into user
+        if (isset($userData['pilgrim']) && is_array($userData['pilgrim'])) {
+            $pilgrimData = $userData['pilgrim'];
+            unset($userData['pilgrim']);
+
+            // Merge pilgrim fields directly into user data
+            $userData['pilgrim_id'] = $pilgrimData['pilgrim_id'] ?? null;
+            $userData['passport_name'] = $pilgrimData['passport_name'] ?? null;
+            $userData['passport_number'] = $pilgrimData['passport_number'] ?? null;
+            $userData['nationality'] = $pilgrimData['nationality'] ?? null;
+            $userData['date_of_birth'] = $pilgrimData['date_of_birth'] ?? null;
+            $userData['gender'] = $pilgrimData['gender'] ?? null;
+            $userData['emergency_call'] = $pilgrimData['emergency_call'] ?? null;
+            $userData['notes'] = $pilgrimData['notes'] ?? null;
+
+            // Convert image paths to absolute URLs
+            $userData['passport_img'] = $this->getAbsoluteImageUrl($pilgrimData['passport_img'] ?? null);
+            $userData['visa_img'] = $this->getAbsoluteImageUrl($pilgrimData['visa_img'] ?? null);
+        } else {
+            // No pilgrim data - set all pilgrim fields to null
+            $userData['pilgrim_id'] = null;
+            $userData['passport_name'] = null;
+            $userData['passport_number'] = null;
+            $userData['nationality'] = null;
+            $userData['date_of_birth'] = null;
+            $userData['gender'] = null;
+            $userData['emergency_call'] = null;
+            $userData['notes'] = null;
+            $userData['passport_img'] = null;
+            $userData['visa_img'] = null;
+        }
+
         return response()->json([
             'message' => 'Profile updated successfully',
-            'user' => $user
+            'user' => $userData
         ]);
     }
 }
