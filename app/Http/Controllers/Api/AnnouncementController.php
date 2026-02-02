@@ -29,6 +29,20 @@ class AnnouncementController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        // Sanitize image_url - remove placeholder URLs
+        $blockedPatterns = ['via.placeholder.com', 'placeholder.com', 'google.com/search', 'file:///'];
+        $announcements->transform(function ($announcement) use ($blockedPatterns) {
+            if ($announcement->image_url) {
+                foreach ($blockedPatterns as $pattern) {
+                    if (str_contains(strtolower($announcement->image_url), $pattern)) {
+                        $announcement->image_url = null;
+                        break;
+                    }
+                }
+            }
+            return $announcement;
+        });
+
         return response()->json($announcements);
     }
 
@@ -73,12 +87,29 @@ class AnnouncementController extends Controller
         }
 
         // Handle image upload
-        $imageUrl = $request->input('image_url'); // Default to provided URL
+        $imageUrl = null; // Default to null, not placeholder
+
         if ($request->hasFile('image')) {
+            // File upload takes priority
             $image = $request->file('image');
             $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
             $path = $image->storeAs('announcements', $filename, 'public');
-            $imageUrl = asset('storage/' . $path);
+            $imageUrl = url('storage/' . $path);
+        } elseif ($request->has('image_url') && $request->input('image_url')) {
+            $providedUrl = $request->input('image_url');
+            // Reject placeholder URLs
+            $blockedPatterns = ['via.placeholder.com', 'placeholder.com', 'google.com/search', 'file:///'];
+            $isBlocked = false;
+            foreach ($blockedPatterns as $pattern) {
+                if (str_contains(strtolower($providedUrl), $pattern)) {
+                    $isBlocked = true;
+                    break;
+                }
+            }
+            // Only use URL if it's not a blocked placeholder
+            if (!$isBlocked && filter_var($providedUrl, FILTER_VALIDATE_URL)) {
+                $imageUrl = $providedUrl;
+            }
         }
 
         $announcement = Announcement::create([
@@ -152,19 +183,43 @@ class AnnouncementController extends Controller
 
         // Handle image upload
         $imageUrl = $announcement->image_url; // Keep existing by default
+
+        // Clear existing placeholder URLs
+        $blockedPatterns = ['via.placeholder.com', 'placeholder.com', 'google.com/search', 'file:///'];
+        if ($imageUrl) {
+            foreach ($blockedPatterns as $pattern) {
+                if (str_contains(strtolower($imageUrl), $pattern)) {
+                    $imageUrl = null; // Clear placeholder
+                    break;
+                }
+            }
+        }
+
         if ($request->hasFile('image')) {
             // Delete old image if it exists and is stored locally
             if ($announcement->image_url && str_contains($announcement->image_url, '/storage/announcements/')) {
-                $oldPath = str_replace(asset('storage/'), '', $announcement->image_url);
+                $oldPath = str_replace(url('storage/'), '', $announcement->image_url);
                 \Illuminate\Support\Facades\Storage::disk('public')->delete($oldPath);
             }
 
             $image = $request->file('image');
             $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
             $path = $image->storeAs('announcements', $filename, 'public');
-            $imageUrl = asset('storage/' . $path);
-        } elseif ($request->has('image_url')) {
-            $imageUrl = $request->input('image_url');
+            $imageUrl = url('storage/' . $path);
+        } elseif ($request->has('image_url') && $request->input('image_url')) {
+            $providedUrl = $request->input('image_url');
+            // Reject placeholder URLs
+            $isBlocked = false;
+            foreach ($blockedPatterns as $pattern) {
+                if (str_contains(strtolower($providedUrl), $pattern)) {
+                    $isBlocked = true;
+                    break;
+                }
+            }
+            // Only use URL if it's not a blocked placeholder
+            if (!$isBlocked && filter_var($providedUrl, FILTER_VALIDATE_URL)) {
+                $imageUrl = $providedUrl;
+            }
         }
 
         $announcement->update([
@@ -194,6 +249,17 @@ class AnnouncementController extends Controller
 
         if (!$announcement) {
             return response()->json(['message' => 'Announcement not found.'], 404);
+        }
+
+        // Sanitize image_url - remove placeholder URLs
+        $blockedPatterns = ['via.placeholder.com', 'placeholder.com', 'google.com/search', 'file:///'];
+        if ($announcement->image_url) {
+            foreach ($blockedPatterns as $pattern) {
+                if (str_contains(strtolower($announcement->image_url), $pattern)) {
+                    $announcement->image_url = null;
+                    break;
+                }
+            }
         }
 
         // Fetch related data if applicable
