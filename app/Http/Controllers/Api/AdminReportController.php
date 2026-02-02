@@ -62,7 +62,7 @@ class AdminReportController extends Controller
 
         // Recent Activity - New users in last 7 days
         $newUsersThisWeek = User::where('created_at', '>=', now()->subDays(7))->count();
-        $newBookingsThisWeek = Booking::where('created_at', '>=', now()->subDays(7))->count();
+        $newBookingsThisWeek = Booking::where('booking_date', '>=', now()->subDays(7))->count();
 
         return response()->json([
             // Primary Metrics (المعتمرين والمشرفين)
