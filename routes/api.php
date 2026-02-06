@@ -38,11 +38,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/user/profile', [\App\Http\Controllers\Api\ProfileController::class, 'update']);
     Route::get('/pilgrim-card', [\App\Http\Controllers\Api\PilgrimCardController::class, 'show']);
 
+
     // Messaging
     Route::get('/messages/contacts', [\App\Http\Controllers\Api\MessageController::class, 'getContactableUsers']);
+    Route::get('/messages/recent', [\App\Http\Controllers\Api\MessageController::class, 'index']); // Alias for frontend
     Route::post('/messages', [\App\Http\Controllers\Api\MessageController::class, 'store']);
     Route::get('/messages', [\App\Http\Controllers\Api\MessageController::class, 'index']);
     Route::get('/messages/{user_id}', [\App\Http\Controllers\Api\MessageController::class, 'show']);
+
+    // User Contacts (for messaging UI) - uses filtered contact list
+    Route::get('/users/contacts', [\App\Http\Controllers\Api\MessageController::class, 'getContactableUsers']); // Alias
 
     // Display Notifications (User)
     Route::get('/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
