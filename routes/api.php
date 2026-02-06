@@ -129,6 +129,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // Common Routes for Admin and Supervisor
     Route::middleware('role:ADMIN,SUPERVISOR')->group(function () {
         Route::get('/trips', [\App\Http\Controllers\Api\TripController::class, 'index']);
+
+        // Route for linking a hotel to a trip (must be above {id} routes)
+        Route::post('/trips/add-hotel', [\App\Http\Controllers\Api\TripController::class, 'addHotel']);
+
         Route::get('/trips/{id}', [\App\Http\Controllers\Api\TripController::class, 'show']);
 
         // Route::get('/groups', [\App\Http\Controllers\Api\GroupController::class, 'index']); // MOVED TO ADMIN
