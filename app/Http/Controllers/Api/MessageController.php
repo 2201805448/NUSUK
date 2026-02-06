@@ -31,7 +31,7 @@ class MessageController extends Controller
                 ->get();
         } elseif ($role === 'supervisor') {
             // Supervisor can see:
-            // 1. All pilgrims in their groups
+            // 1. All pilgrims in their groups (linked via groups_trips where supervisor_id = this user)
             // 2. All admins
 
             // Get pilgrim user IDs from groups supervised by this user
@@ -41,6 +41,12 @@ class MessageController extends Controller
                 ->where('groups_trips.supervisor_id', $user->user_id)
                 ->pluck('pilgrims.user_id')
                 ->toArray();
+
+            // DEBUG: Log for troubleshooting
+            \Log::info('MessageController - Supervisor contacts lookup', [
+                'supervisor_user_id' => $user->user_id,
+                'found_pilgrim_user_ids' => $pilgrimUserIds,
+            ]);
 
             // Get all admin user IDs
             $adminIds = User::whereRaw('LOWER(role) = ?', ['admin'])
@@ -228,6 +234,12 @@ class MessageController extends Controller
                 ->where('groups_trips.supervisor_id', $user->user_id)
                 ->pluck('pilgrims.user_id')
                 ->toArray();
+
+            // DEBUG: Log for troubleshooting
+            \Log::info('MessageController - getAllowedUserIds for Supervisor', [
+                'supervisor_user_id' => $user->user_id,
+                'found_pilgrim_user_ids' => $pilgrimUserIds,
+            ]);
 
             $adminIds = User::whereRaw('LOWER(role) = ?', ['admin'])
                 ->pluck('user_id')
