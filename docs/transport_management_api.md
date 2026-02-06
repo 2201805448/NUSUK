@@ -47,10 +47,12 @@ Add a new transport to a trip.
   | `trip_id` | int | Yes | Trip ID |
   | `transport_type` | string | Yes | Bus, Train, etc. |
   | `departure_time` | datetime | Yes | YYYY-MM-DD HH:MM:SS |
+  | `arrival_time` | datetime | No | YYYY-MM-DD HH:MM:SS (وقت الوصول) |
   | `route_id` | int | No | Pre-defined Route ID |
   | `driver_id` | int | No | Driver ID |
   | `route_from` | string | Cond* | Required if route_id is missing |
   | `route_to` | string | Cond* | Required if route_id is missing |
+  | `notes` | string | No | Additional notes |
   
 - **Success Response (201 Created)**:
   ```json
