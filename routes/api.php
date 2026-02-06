@@ -185,12 +185,15 @@ Route::middleware('auth:sanctum')->group(function () {
         // Route::post('/groups/{group}/supervisor', [\App\Http\Controllers\Api\GroupController::class, 'assignSupervisor']); // MOVED TO ADMIN
         // Route::put('/groups/{id}/unassign-supervisor', [\App\Http\Controllers\Api\GroupController::class, 'unassignSupervisor']); // MOVED TO ADMIN
 
-        // Monitoring
-        Route::get('/trips/{id}/housing', [\App\Http\Controllers\Api\AccommodationController::class, 'getHousingData']);
 
-        // Room Assignment
-        Route::post('/room-assignments', [\App\Http\Controllers\Api\RoomAssignmentController::class, 'store']);
-        Route::put('/room-assignments/{id}', [\App\Http\Controllers\Api\RoomAssignmentController::class, 'update']);
+        // Monitoring & Housing - SUPERVISOR ONLY (Admin blocked)
+        Route::middleware('block.role:ADMIN')->group(function () {
+            Route::get('/trips/{id}/housing', [\App\Http\Controllers\Api\AccommodationController::class, 'getHousingData']);
+
+            // Room Assignment
+            Route::post('/room-assignments', [\App\Http\Controllers\Api\RoomAssignmentController::class, 'store']);
+            Route::put('/room-assignments/{id}', [\App\Http\Controllers\Api\RoomAssignmentController::class, 'update']);
+        });
 
         // Activity Management (Shared)
         Route::apiResource('activities', \App\Http\Controllers\Api\ActivityController::class);
