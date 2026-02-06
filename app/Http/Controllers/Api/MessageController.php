@@ -53,6 +53,10 @@ class MessageController extends Controller
                 ->pluck('user_id')
                 ->toArray();
 
+            \Log::info('MessageController - Supervisor: Admin IDs included', [
+                'admin_ids' => $adminIds,
+            ]);
+
             $allowedUserIds = array_unique(array_merge($pilgrimUserIds, $adminIds));
 
             $users = User::whereIn('user_id', $allowedUserIds)
@@ -81,6 +85,10 @@ class MessageController extends Controller
             $adminIds = User::whereRaw('LOWER(role) = ?', ['admin'])
                 ->pluck('user_id')
                 ->toArray();
+
+            \Log::info('MessageController - Pilgrim: Admin IDs included', [
+                'admin_ids' => $adminIds,
+            ]);
 
             $allowedUserIds = array_unique(array_merge($supervisorIds, $adminIds));
 
