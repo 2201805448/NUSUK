@@ -15,7 +15,7 @@ class TransportController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Transport::query();
+        $query = Transport::with(['route', 'driver']);
 
         if ($request->has('trip_id')) {
             $query->where('trip_id', $request->trip_id);
