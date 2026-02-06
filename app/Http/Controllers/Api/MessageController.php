@@ -48,20 +48,23 @@ class MessageController extends Controller
                 'found_pilgrim_user_ids' => $pilgrimUserIds,
             ]);
 
-            // Get all admin user IDs - use case-insensitive search
-            $adminIds = User::where('role', 'like', '%admin%')
-                ->pluck('user_id')
-                ->toArray();
-
-            \Log::info('MessageController - Supervisor: Admin IDs included', [
-                'admin_ids' => $adminIds,
-            ]);
-
-            $allowedUserIds = array_unique(array_merge($pilgrimUserIds, $adminIds));
-
-            $users = User::whereIn('user_id', $allowedUserIds)
+            // Get pilgrims as users
+            $pilgrimUsers = User::whereIn('user_id', $pilgrimUserIds)
                 ->select('user_id', 'full_name', 'role', 'email')
                 ->get();
+
+            // Get ALL admin users separately (always include)
+            $adminUsers = User::where('role', 'Admin')
+                ->select('user_id', 'full_name', 'role', 'email')
+                ->get();
+
+            \Log::info('MessageController - Supervisor: Admin users found', [
+                'admin_count' => $adminUsers->count(),
+                'admin_ids' => $adminUsers->pluck('user_id')->toArray(),
+            ]);
+
+            // Merge pilgrims and admins, remove duplicates
+            $users = $pilgrimUsers->merge($adminUsers)->unique('user_id')->values();
         } elseif ($role === 'pilgrim') {
             // Pilgrim can see:
             // 1. Their supervisor(s) from their group(s)
@@ -81,20 +84,23 @@ class MessageController extends Controller
                     ->toArray();
             }
 
-            // Get all admin user IDs - use case-insensitive search
-            $adminIds = User::where('role', 'like', '%admin%')
-                ->pluck('user_id')
-                ->toArray();
-
-            \Log::info('MessageController - Pilgrim: Admin IDs included', [
-                'admin_ids' => $adminIds,
-            ]);
-
-            $allowedUserIds = array_unique(array_merge($supervisorIds, $adminIds));
-
-            $users = User::whereIn('user_id', $allowedUserIds)
+            // Get supervisors as users
+            $supervisorUsers = User::whereIn('user_id', $supervisorIds)
                 ->select('user_id', 'full_name', 'role', 'email')
                 ->get();
+
+            // Get ALL admin users separately (always include)
+            $adminUsers = User::where('role', 'Admin')
+                ->select('user_id', 'full_name', 'role', 'email')
+                ->get();
+
+            \Log::info('MessageController - Pilgrim: Admin users found', [
+                'admin_count' => $adminUsers->count(),
+                'admin_ids' => $adminUsers->pluck('user_id')->toArray(),
+            ]);
+
+            // Merge supervisors and admins, remove duplicates
+            $users = $supervisorUsers->merge($adminUsers)->unique('user_id')->values();
         } else {
             // Default: no contacts (Support role or other roles)
             $users = collect([]);
@@ -249,7 +255,8 @@ class MessageController extends Controller
                 'found_pilgrim_user_ids' => $pilgrimUserIds,
             ]);
 
-            $adminIds = User::where('role', 'like', '%admin%')
+            // Get ALL admin user IDs (exact match 'Admin')
+            $adminIds = User::where('role', 'Admin')
                 ->pluck('user_id')
                 ->toArray();
 
@@ -268,7 +275,8 @@ class MessageController extends Controller
                     ->toArray();
             }
 
-            $adminIds = User::where('role', 'like', '%admin%')
+            // Get ALL admin user IDs (exact match 'Admin')
+            $adminIds = User::where('role', 'Admin')
                 ->pluck('user_id')
                 ->toArray();
 
