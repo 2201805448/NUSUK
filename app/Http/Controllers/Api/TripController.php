@@ -13,7 +13,7 @@ class TripController extends Controller
     // List all trips
     public function index()
     {
-        $trips = Trip::with(['accommodations', 'transports.route', 'activities'])->get();
+        $trips = Trip::with(['accommodations', 'transports.route', 'transports.driver', 'activities'])->get();
         return response()->json($trips);
     }
 
@@ -41,7 +41,7 @@ class TripController extends Controller
     // Get specific trip with its hotels
     public function show($id)
     {
-        $trip = Trip::with(['accommodations', 'transports.route', 'activities'])->findOrFail($id);
+        $trip = Trip::with(['accommodations', 'transports.route', 'transports.driver', 'activities'])->findOrFail($id);
         return response()->json($trip);
     }
 
