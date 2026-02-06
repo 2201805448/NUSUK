@@ -84,48 +84,32 @@ class TripController extends Controller
 
     /**
      * Add hotel data to a trip.
-     * Can link an existing hotel (by accommodation_id) OR create a new one.
-     * Saves check_in, check_out, and rooms data in the pivot table.
+     * Links an existing hotel (by accommodation_id) to a trip.
      */
-    public function addHotel(Request $request) // احذفي متغير $id من هنا
+    public function addHotel(Request $request)
     {
-        // استلام الـ ID من البيانات المرسلة
+        // Get trip_id from the request body
         $tripId = $request->trip_id;
         $trip = Trip::findOrFail($tripId);
 
         $validated = $request->validate([
             'accommodation_id' => 'required|exists:accommodations,accommodation_id',
-            'check_in' => 'nullable|date',
-            'check_out' => 'nullable|date|after_or_equal:check_in',
-            'rooms' => 'nullable|array',
-            'rooms.*.room_type' => 'nullable|string',
-            'rooms.*.quantity' => 'nullable|integer|min:1',
         ]);
-
-        // Prepare pivot data
-        $pivotData = [
-            'check_in' => $validated['check_in'] ?? null,
-            'check_out' => $validated['check_out'] ?? null,
-            'rooms' => isset($validated['rooms']) ? json_encode($validated['rooms']) : null,
-        ];
 
         // Check if the hotel is already linked
         $existingLink = $trip->accommodations()
             ->where('trip_accommodations.accommodation_id', $validated['accommodation_id'])
             ->exists();
 
-        if ($existingLink) {
-            // Update existing link with new data
-            $trip->accommodations()->updateExistingPivot($validated['accommodation_id'], $pivotData);
-        } else {
-            // Attach new hotel with pivot data
-            $trip->accommodations()->attach($validated['accommodation_id'], $pivotData);
+        if (!$existingLink) {
+            // Attach new hotel
+            $trip->accommodations()->attach($validated['accommodation_id']);
         }
 
-        // Reload the trip with accommodations to get the saved data
+        // Reload the trip with accommodations
         $trip->load('accommodations');
 
-        // Get the just-saved accommodation with pivot data
+        // Get the linked accommodation
         $savedAccommodation = $trip->accommodations
             ->where('accommodation_id', $validated['accommodation_id'])
             ->first();
@@ -136,9 +120,8 @@ class TripController extends Controller
                 'accommodation_id' => $savedAccommodation->accommodation_id,
                 'hotel_name' => $savedAccommodation->hotel_name ?? $savedAccommodation->name ?? null,
                 'city' => $savedAccommodation->city ?? null,
-                'check_in' => $savedAccommodation->pivot->check_in,
-                'check_out' => $savedAccommodation->pivot->check_out,
-                'rooms' => $savedAccommodation->pivot->rooms ? json_decode($savedAccommodation->pivot->rooms, true) : null,
+                'address' => $savedAccommodation->address ?? null,
+                'phone' => $savedAccommodation->phone ?? null,
             ],
             'trip' => $trip
         ]);
