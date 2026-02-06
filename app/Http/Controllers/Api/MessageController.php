@@ -224,15 +224,20 @@ class MessageController extends Controller
      */
     private function canMessageUser($sender, $receiverId)
     {
-        // Allow if receiver_id is 0 or null (loading chat dashboard before selecting contact)
-        if (empty($receiverId) || $receiverId == 0) {
+        // Allow if receiver_id is 0, null, or empty (loading chat dashboard before selecting contact)
+        // Cast to int first to handle string "0" from URL
+        $receiverIdInt = (int) $receiverId;
+
+        if ($receiverIdInt === 0 || $receiverId === null || $receiverId === '') {
+            \Log::info('MessageController - canMessageUser: Allowing access (receiver_id is 0/null/empty)', [
+                'sender_id' => $sender->user_id,
+                'receiver_id_raw' => $receiverId,
+                'receiver_id_int' => $receiverIdInt,
+            ]);
             return true;
         }
 
         $allowedUserIds = $this->getAllowedUserIds($sender);
-
-        // Cast receiverId to integer for proper comparison (URL params are strings)
-        $receiverIdInt = (int) $receiverId;
 
         // DEBUG: Log for troubleshooting authorization issues
         \Log::info('MessageController - canMessageUser check', [
