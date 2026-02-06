@@ -113,6 +113,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/my-notes', [\App\Http\Controllers\Api\PilgrimNoteController::class, 'store']);
     Route::get('/my-notes', [\App\Http\Controllers\Api\PilgrimNoteController::class, 'myNotes']);
 
+    // Evaluations (Reviews/Ratings)
+    Route::get('/evaluations/trips', [\App\Http\Controllers\Api\EvaluationController::class, 'trips']);
+    Route::get('/evaluations/hotels', [\App\Http\Controllers\Api\EvaluationController::class, 'hotels']);
+    Route::get('/evaluations', [\App\Http\Controllers\Api\EvaluationController::class, 'index']);
+    Route::get('/evaluations/{id}', [\App\Http\Controllers\Api\EvaluationController::class, 'show']);
+    Route::post('/evaluations', [\App\Http\Controllers\Api\EvaluationController::class, 'store']);
+
     // Common Routes for Admin and Supervisor
     Route::middleware('role:ADMIN,SUPERVISOR')->group(function () {
         Route::get('/trips', [\App\Http\Controllers\Api\TripController::class, 'index']);
