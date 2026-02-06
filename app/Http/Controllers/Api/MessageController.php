@@ -225,7 +225,20 @@ class MessageController extends Controller
     private function canMessageUser($sender, $receiverId)
     {
         $allowedUserIds = $this->getAllowedUserIds($sender);
-        return in_array($receiverId, $allowedUserIds);
+        
+        // Cast receiverId to integer for proper comparison (URL params are strings)
+        $receiverIdInt = (int) $receiverId;
+        
+        // DEBUG: Log for troubleshooting authorization issues
+        \Log::info('MessageController - canMessageUser check', [
+            'sender_id' => $sender->user_id,
+            'sender_role' => $sender->role,
+            'receiver_id' => $receiverIdInt,
+            'allowed_user_ids' => $allowedUserIds,
+            'is_allowed' => in_array($receiverIdInt, $allowedUserIds),
+        ]);
+        
+        return in_array($receiverIdInt, $allowedUserIds);
     }
 
     /**
