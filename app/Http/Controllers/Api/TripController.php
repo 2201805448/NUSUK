@@ -13,7 +13,7 @@ class TripController extends Controller
     // List all trips
     public function index()
     {
-        $trips = Trip::with(['accommodations', 'transports.route', 'transports.driver', 'activities'])->get();
+        $trips = Trip::with(['accommodations', 'transports.route', 'transports.driver', 'transports.routeFrom', 'transports.routeTo', 'activities'])->get();
         return response()->json($trips);
     }
 
@@ -41,7 +41,7 @@ class TripController extends Controller
     // Get specific trip with its hotels
     public function show($id)
     {
-        $trip = Trip::with(['accommodations', 'transports.route', 'transports.driver', 'activities'])->findOrFail($id);
+        $trip = Trip::with(['accommodations', 'transports.route', 'transports.driver', 'transports.routeFrom', 'transports.routeTo', 'activities'])->findOrFail($id);
         return response()->json($trip);
     }
 
@@ -172,8 +172,8 @@ class TripController extends Controller
             'transport_type' => 'required|string|max:50',
             'route_id' => 'nullable|exists:transport_routes,id',
             'driver_id' => 'nullable|exists:drivers,driver_id',
-            'route_from' => 'required_without:route_id|string|max:100',
-            'route_to' => 'required_without:route_id|string|max:100',
+            'route_from' => 'nullable|integer|exists:transport_routes,id',
+            'route_to' => 'nullable|integer|exists:transport_routes,id',
             'departure_time' => 'required|date',
             'arrival_time' => 'nullable|date|after:departure_time',
             'notes' => 'nullable|string',
@@ -194,12 +194,6 @@ class TripController extends Controller
         if ($request->filled('route_id')) {
             $route = \App\Models\TransportRoute::find($request->route_id);
             if ($route) {
-                // Auto-fill route_from and route_to if not provided
-                if (!$request->filled('route_from'))
-                    $data['route_from'] = $route->start_location;
-                if (!$request->filled('route_to'))
-                    $data['route_to'] = $route->end_location;
-
                 // Auto-calculate arrival_time if not provided
                 if (!$request->filled('arrival_time') && $request->filled('departure_time') && $route->estimated_duration_mins) {
                     $departureTime = \Carbon\Carbon::parse($request->departure_time);

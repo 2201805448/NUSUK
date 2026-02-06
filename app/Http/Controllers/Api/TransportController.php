@@ -15,7 +15,7 @@ class TransportController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Transport::with(['route', 'driver']);
+        $query = Transport::with(['route', 'driver', 'routeFrom', 'routeTo']);
 
         if ($request->has('trip_id')) {
             $query->where('trip_id', $request->trip_id);
@@ -32,15 +32,12 @@ class TransportController extends Controller
         $request->validate([
             'trip_id' => 'nullable|exists:trips,trip_id',
             'driver_id' => 'nullable|exists:drivers,driver_id',
-            'route_id' => 'nullable|exists:transport_routes,id', // Added
+            'route_id' => 'nullable|exists:transport_routes,id',
             'transport_type' => 'required|string|max:50',
-
-            // If route_id is missing, these are required. If present, they are optional (auto-filled if missing).
-            'route_from' => 'required_without:route_id|string|max:100',
-            'route_to' => 'required_without:route_id|string|max:100',
-
+            'route_from' => 'nullable|integer|exists:transport_routes,id',
+            'route_to' => 'nullable|integer|exists:transport_routes,id',
             'departure_time' => 'required|date',
-            'arrival_time' => 'nullable|date|after:departure_time', // Added
+            'arrival_time' => 'nullable|date|after:departure_time',
             'notes' => 'nullable|string',
         ]);
 
@@ -53,12 +50,6 @@ class TransportController extends Controller
         if ($request->filled('route_id')) {
             $route = \App\Models\TransportRoute::find($request->route_id);
             if ($route) {
-                // Auto-fill route_from and route_to
-                if (!$request->filled('route_from'))
-                    $data['route_from'] = $route->start_location;
-                if (!$request->filled('route_to'))
-                    $data['route_to'] = $route->end_location;
-
                 // Auto-calculate arrival_time if not provided
                 if (!$request->filled('arrival_time') && $request->filled('departure_time') && $route->estimated_duration_mins) {
                     $departureTime = \Carbon\Carbon::parse($request->departure_time);
@@ -96,31 +87,14 @@ class TransportController extends Controller
             'driver_id' => 'nullable|exists:drivers,driver_id',
             'route_id' => 'nullable|exists:transport_routes,id',
             'transport_type' => 'sometimes|string|max:50',
-            'route_from' => 'nullable|string|max:100',
-            'route_to' => 'nullable|string|max:100',
+            'route_from' => 'nullable|integer|exists:transport_routes,id',
+            'route_to' => 'nullable|integer|exists:transport_routes,id',
             'departure_time' => 'sometimes|date',
             'arrival_time' => 'nullable|date|after:departure_time',
             'notes' => 'nullable|string',
         ]);
 
-        $data = $request->except(['route_from', 'route_to']); // Handle conditional logic for route fields
-
-        // Handle route auto-fill logic similar to store if route_id changes or is present
-        if ($request->has('route_id') && $request->route_id) {
-            $route = \App\Models\TransportRoute::find($request->route_id);
-            if ($route) {
-                if (!$request->filled('route_from'))
-                    $data['route_from'] = $route->start_location;
-                if (!$request->filled('route_to'))
-                    $data['route_to'] = $route->end_location;
-            }
-        } else {
-            // If manual fields are provided, use them
-            if ($request->filled('route_from'))
-                $data['route_from'] = $request->route_from;
-            if ($request->filled('route_to'))
-                $data['route_to'] = $request->route_to;
-        }
+        $data = $request->all();
 
         // If simply updating fields without changing route logic significantly, standard update works but need to be careful with nulls if not provided. 
         // Actually, simplest approach:
