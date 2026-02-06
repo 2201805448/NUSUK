@@ -39,6 +39,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/pilgrim-card', [\App\Http\Controllers\Api\PilgrimCardController::class, 'show']);
 
     // Messaging
+    Route::get('/messages/contacts', [\App\Http\Controllers\Api\MessageController::class, 'getContactableUsers']);
     Route::post('/messages', [\App\Http\Controllers\Api\MessageController::class, 'store']);
     Route::get('/messages', [\App\Http\Controllers\Api\MessageController::class, 'index']);
     Route::get('/messages/{user_id}', [\App\Http\Controllers\Api\MessageController::class, 'show']);
