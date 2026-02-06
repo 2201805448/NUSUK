@@ -48,8 +48,8 @@ class MessageController extends Controller
                 'found_pilgrim_user_ids' => $pilgrimUserIds,
             ]);
 
-            // Get all admin user IDs
-            $adminIds = User::whereRaw('LOWER(role) = ?', ['admin'])
+            // Get all admin user IDs - use case-insensitive search
+            $adminIds = User::where('role', 'like', '%admin%')
                 ->pluck('user_id')
                 ->toArray();
 
@@ -81,8 +81,8 @@ class MessageController extends Controller
                     ->toArray();
             }
 
-            // Get all admin user IDs
-            $adminIds = User::whereRaw('LOWER(role) = ?', ['admin'])
+            // Get all admin user IDs - use case-insensitive search
+            $adminIds = User::where('role', 'like', '%admin%')
                 ->pluck('user_id')
                 ->toArray();
 
@@ -249,7 +249,7 @@ class MessageController extends Controller
                 'found_pilgrim_user_ids' => $pilgrimUserIds,
             ]);
 
-            $adminIds = User::whereRaw('LOWER(role) = ?', ['admin'])
+            $adminIds = User::where('role', 'like', '%admin%')
                 ->pluck('user_id')
                 ->toArray();
 
@@ -268,7 +268,7 @@ class MessageController extends Controller
                     ->toArray();
             }
 
-            $adminIds = User::whereRaw('LOWER(role) = ?', ['admin'])
+            $adminIds = User::where('role', 'like', '%admin%')
                 ->pluck('user_id')
                 ->toArray();
 
