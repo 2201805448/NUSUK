@@ -230,6 +230,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/stats', [\App\Http\Controllers\Api\AdminController::class, 'stats']);
         Route::get('/general-stats', [\App\Http\Controllers\Api\AdminController::class, 'generalStats']);
         Route::get('/admin/stats', [AdminReportController::class, 'getStats']); // Dashboard report stats
+
+        // Admin Notifications History
+        Route::get('/admin/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
         Route::get('/users', [\App\Http\Controllers\Api\AdminController::class, 'users']);
         Route::post('/users', [\App\Http\Controllers\Api\AdminController::class, 'store']);
         Route::get('/users/{id}', [\App\Http\Controllers\Api\AdminController::class, 'show']);
