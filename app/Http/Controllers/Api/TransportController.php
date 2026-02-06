@@ -46,14 +46,24 @@ class TransportController extends Controller
 
         $data = $request->all();
 
+        // DEBUG: Log incoming data to check if arrival_time is being sent
+        \Log::info('Transport Store - Received Data:', $data);
+
         // Auto-fill from route if linked and fields are missing
-        if ($request->filled('route_id') && (!$request->filled('route_from') || !$request->filled('route_to'))) {
+        if ($request->filled('route_id')) {
             $route = \App\Models\TransportRoute::find($request->route_id);
             if ($route) {
+                // Auto-fill route_from and route_to
                 if (!$request->filled('route_from'))
                     $data['route_from'] = $route->start_location;
                 if (!$request->filled('route_to'))
                     $data['route_to'] = $route->end_location;
+
+                // Auto-calculate arrival_time if not provided
+                if (!$request->filled('arrival_time') && $request->filled('departure_time') && $route->estimated_duration_mins) {
+                    $departureTime = \Carbon\Carbon::parse($request->departure_time);
+                    $data['arrival_time'] = $departureTime->addMinutes($route->estimated_duration_mins);
+                }
             }
         }
 
@@ -126,6 +136,15 @@ class TransportController extends Controller
                     $transport->route_from = $route->start_location;
                 if (!$request->filled('route_to'))
                     $transport->route_to = $route->end_location;
+
+                // Auto-calculate arrival_time if not provided
+                $departureTime = $request->filled('departure_time')
+                    ? $request->departure_time
+                    : $transport->departure_time;
+
+                if (!$request->filled('arrival_time') && $departureTime && $route->estimated_duration_mins) {
+                    $transport->arrival_time = \Carbon\Carbon::parse($departureTime)->addMinutes($route->estimated_duration_mins);
+                }
             }
         }
 
