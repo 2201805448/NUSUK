@@ -170,21 +170,48 @@ class TripController extends Controller
 
         $request->validate([
             'transport_type' => 'required|string|max:50',
-            'route_from' => 'required|string|max:100',
-            'route_to' => 'required|string|max:100',
+            'route_id' => 'nullable|exists:transport_routes,id',
+            'driver_id' => 'nullable|exists:drivers,driver_id',
+            'route_from' => 'required_without:route_id|string|max:100',
+            'route_to' => 'required_without:route_id|string|max:100',
             'departure_time' => 'required|date',
             'arrival_time' => 'nullable|date|after:departure_time',
             'notes' => 'nullable|string',
         ]);
 
-        $transport = $trip->transports()->create([
+        $data = [
             'transport_type' => $request->transport_type,
+            'driver_id' => $request->driver_id,
+            'route_id' => $request->route_id,
             'route_from' => $request->route_from,
             'route_to' => $request->route_to,
             'departure_time' => $request->departure_time,
             'arrival_time' => $request->arrival_time,
             'notes' => $request->notes,
-        ]);
+        ];
+
+        // Auto-fill from route if linked
+        if ($request->filled('route_id')) {
+            $route = \App\Models\TransportRoute::find($request->route_id);
+            if ($route) {
+                // Auto-fill route_from and route_to if not provided
+                if (!$request->filled('route_from'))
+                    $data['route_from'] = $route->start_location;
+                if (!$request->filled('route_to'))
+                    $data['route_to'] = $route->end_location;
+
+                // Auto-calculate arrival_time if not provided
+                if (!$request->filled('arrival_time') && $request->filled('departure_time') && $route->estimated_duration_mins) {
+                    $departureTime = \Carbon\Carbon::parse($request->departure_time);
+                    $data['arrival_time'] = $departureTime->addMinutes($route->estimated_duration_mins);
+                }
+            }
+        }
+
+        $transport = $trip->transports()->create($data);
+
+        // Load relationships for response
+        $transport->load(['route', 'driver']);
 
         return response()->json([
             'message' => 'Transport stage added to trip successfully',
