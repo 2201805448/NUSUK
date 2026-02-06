@@ -35,6 +35,7 @@ class Trip extends Model
     public function accommodations()
     {
         return $this->belongsToMany(Accommodation::class, 'trip_accommodations', 'trip_id', 'accommodation_id')
+            ->withPivot('check_in', 'check_out', 'rooms')
             ->withTimestamps();
     }
 
